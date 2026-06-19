@@ -233,6 +233,15 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
       <select class="qa-input" id="fCat" onchange="onCatChange()"></select>
       <select class="qa-input" id="fSubitem" style="display:none"></select>
       <input class="qa-input" id="fDesc" placeholder="Ou descreva manualmente..." autocomplete="off" />
+      <div style="background:var(--surface2);border-radius:var(--radius-sm);border:.5px solid var(--border2);padding:10px 13px">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">💱 Converter R$ → ¥ (cotação: <span id="miniRateLabel">¥ —</span>)</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input id="miniRealInput" class="qa-input" type="number" inputmode="decimal" placeholder="R$ valor em reais" oninput="miniConvert()" style="flex:1;font-size:14px;padding:9px 11px" />
+          <div style="font-size:18px;color:var(--muted);flex-shrink:0">→</div>
+          <div id="miniYenResult" style="flex:1;background:var(--surface);border:.5px solid var(--border2);border-radius:var(--radius-sm);padding:9px 11px;font-size:14px;font-weight:700;color:var(--green);cursor:pointer;text-align:center" onclick="useMiniYen()" title="Clique para usar este valor">¥ —</div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:5px;text-align:right">Toque no valor em ¥ para usar no lançamento</div>
+      </div>
       <input class="qa-input" id="fValor" type="number" inputmode="decimal" placeholder="Valor em ¥" min="0" />
       <button class="btn-add" id="addBtn" onclick="addEntry()">+ Registrar</button>
     </div>
@@ -294,8 +303,6 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
   <div class="sec-label">Status dos dados</div>
   <div class="chart-card" id="dataStatus" style="font-size:13px;color:var(--muted);line-height:1.8"></div>
   <button class="btn-add" style="margin-top:10px" onclick="openSetup()">⚙ Reconfigurar conexão</button>
-  <button class="btn-add" style="margin-top:8px;background:var(--green);color:#0f172a" onclick="syncMissing()">☁ Sincronizar dados sem apagar</button>
-  <div style="font-size:11px;color:var(--muted);margin-top:4px;margin-bottom:10px">Insere no Supabase apenas registros que ainda não existem (Junho, etc.)</div>
   <div class="danger-card">
     <div class="dt">⚠ Zona de perigo</div>
     <p>Apaga todos os dados locais e restaura apenas Abril, Maio e Junho originais.</p>
@@ -664,7 +671,10 @@ function renderLineChart(){
 function renderLanc(){
   buildPills('msel-l',renderLanc);
   document.getElementById('fMes').innerHTML=ALL_MONTHS.map(m=>`<option value="${m}"${m===curMonth&&curMonth!=='Anual'?' selected':''}>${m}</option>`).join('');
-  document.getElementById('fCat').innerHTML=S.categorias.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  // Use INITIAL_CATS for display (has emojis + correct names) merged with any user-added cats
+  const allCats=[...INITIAL_CATS];
+  S.categorias.forEach(sc=>{if(!allCats.find(ic=>ic.id===sc.id))allCats.push(sc);});
+  document.getElementById('fCat').innerHTML=allCats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
   onCatChange();
   const m=curMonth==='Anual'?getMonths().slice(-1)[0]:curMonth;
   document.getElementById('lblMesD').textContent=m||'';
@@ -691,23 +701,28 @@ function entryHTML(x,color){
 
 function onCatChange(){
   const catId=document.getElementById('fCat').value;
-  // First try from S.categorias, then fallback to INITIAL_CATS
-  let cat=S.categorias.find(c=>c.id===catId);
-  if(!cat||!cat.items||cat.items.length===0){
-    const init=INITIAL_CATS.find(ic=>ic.id===catId);
-    if(init&&(!cat)){cat=init;}
-    else if(init&&cat){cat.items=init.items;}
+  // Always use INITIAL_CATS as source of truth for items list
+  const initCat=INITIAL_CATS.find(ic=>ic.id===catId);
+  // Also check runtime S.categorias for user-added items
+  const sCat=S.categorias.find(c=>c.id===catId);
+  // Merge: start with INITIAL items, add any extra from S.categorias
+  let items=initCat?[...initCat.items]:[];
+  if(sCat&&sCat.items){
+    sCat.items.forEach(it=>{if(!items.includes(it))items.push(it);});
   }
-  const items=(cat&&cat.items)||[];
   const sel=document.getElementById('fSubitem');
+  const descInp=document.getElementById('fDesc');
   if(items.length>0){
     sel.style.display='block';
     sel.innerHTML='<option value="">— Selecione o local/serviço —</option>'+items.map(i=>`<option value="${i}">${i}</option>`).join('');
-    sel.onchange=()=>{const v=sel.value;if(v)document.getElementById('fDesc').value=v;};
+    sel.onchange=()=>{
+      const v=sel.value;
+      if(v){descInp.value=v;descInp.placeholder='Ou descreva manualmente...';}
+    };
   } else {
     sel.style.display='none';
-    document.getElementById('fDesc').placeholder='Descreva o lançamento...';
   }
+  descInp.value='';
 }
 
 function setTipo(t){
@@ -717,6 +732,34 @@ function setTipo(t){
   document.getElementById('addBtn').className='btn-add'+(t==='entrada'?' verde':'');
 }
 
+function miniConvert(){
+  const v=parseFloat(document.getElementById('miniRealInput').value)||0;
+  const yen=v*S.brlRate;
+  const el=document.getElementById('miniYenResult');
+  if(v){
+    el.textContent='¥ '+Math.round(yen).toLocaleString('ja-JP');
+    el.style.color='var(--green)';
+  } else {
+    el.textContent='¥ —';
+    el.style.color='var(--muted)';
+  }
+}
+function useMiniYen(){
+  const v=parseFloat(document.getElementById('miniRealInput').value)||0;
+  if(!v)return;
+  const yen=Math.round(v*S.brlRate);
+  document.getElementById('fValor').value=yen;
+  document.getElementById('fValor').focus();
+  // flash feedback
+  const el=document.getElementById('miniYenResult');
+  el.style.color='var(--accent)';
+  setTimeout(()=>el.style.color='var(--green)',600);
+  toast('¥'+yen.toLocaleString('ja-JP')+' adicionado ao valor ✓','ok');
+}
+function updateMiniRateLabel(){
+  const el=document.getElementById('miniRateLabel');
+  if(el)el.textContent='¥ '+S.brlRate.toFixed(2)+'/R$';
+}
 async function addEntry(){
   const desc=document.getElementById('fDesc').value.trim();
   const subitem=document.getElementById('fSubitem').value||'';
@@ -729,6 +772,8 @@ async function addEntry(){
   S.lancamentos.push(entry);saveLocal();
   document.getElementById('fDesc').value='';document.getElementById('fValor').value='';document.getElementById('fDia').value='';
   document.getElementById('fSubitem').value='';
+  document.getElementById('miniRealInput').value='';
+  document.getElementById('miniYenResult').textContent='¥ —';
   renderLanc();toast(curTipo==='despesa'?'Despesa registrada ✓':'Entrada registrada ✓','ok');
   if(useCloud&&SB){
     setSyncStatus('syncing','Salvando...');
@@ -910,23 +955,55 @@ function renderCfg(){
 async function syncMissing(){
   if(!useCloud||!SB){toast('Conecte ao Supabase primeiro','err');return;}
   setSyncStatus('syncing','Sincronizando dados...');
+  // Build dedup key from content (not id, since ids may differ)
+  function dedupKey(l){return l.mes+'|'+l.tipo+'|'+l.descricao+'|'+l.valor+'|'+l.dia;}
+  const existingKeys=new Set(S.lancamentos.map(dedupKey));
+  const existingIds=new Set(S.lancamentos.map(l=>l.id));
   let inserted=0,skipped=0;
-  const existing=new Set(S.lancamentos.map(l=>l.id));
   for(const l of INITIAL_LANC){
-    if(!existing.has(l.id)){
-      try{await cloudInsert(l);S.lancamentos.push(l);inserted++;}
-      catch(e){skipped++;}
+    const key=dedupKey(l);
+    if(!existingKeys.has(key)&&!existingIds.has(l.id)){
+      try{
+        await cloudInsert(l);
+        S.lancamentos.push(l);
+        existingKeys.add(key);
+        existingIds.add(l.id);
+        inserted++;
+      } catch(e){skipped++;}
     } else { skipped++; }
   }
+  // Also sync categories with items
+  for(const cat of INITIAL_CATS){
+    try{await cloudUpsertCat(cat);}catch(e){}
+  }
+  // Update local categories to have full items
+  INITIAL_CATS.forEach(ic=>{
+    const found=S.categorias.find(c=>c.id===ic.id);
+    if(found){found.items=JSON.parse(JSON.stringify(ic.items));found.name=ic.name;found.color=ic.color;}
+    else S.categorias.push(JSON.parse(JSON.stringify(ic)));
+  });
   saveLocal();
   setSyncStatus('online','Sincronizado');
   renderCfg();
-  toast(inserted+' lançamentos inseridos, '+skipped+' já existiam','ok');
-  goPage('dashboard');
+  const msg=inserted>0?inserted+' lançamentos inseridos! Junho adicionado ✓':'Todos os dados já estão sincronizados';
+  toast(msg,'ok');
+  setTimeout(()=>goPage('dashboard'),1500);
 }
 async function resetData(){
-  if(!confirm('Apagar tudo e restaurar dados iniciais?'))return;
+  const conf=prompt('⚠ ATENÇÃO: isso apaga TODOS os lançamentos!\n\nDigite RESETAR para confirmar:');
+  if(conf!=='RESETAR'){toast('Reset cancelado','err');return;}
   S={lancamentos:JSON.parse(JSON.stringify(INITIAL_LANC)),categorias:JSON.parse(JSON.stringify(INITIAL_CATS)),brlRate:31.72,rateTS:'',taxas:{}};
+  if(useCloud&&SB){
+    setSyncStatus('syncing','Resetando na nuvem...');
+    try{
+      // Delete all and reinsert
+      await sbFetch('lancamentos?id=neq.NONE','DELETE');
+      await sbFetch('categorias?id=neq.NONE','DELETE');
+      for(const c of INITIAL_CATS){try{await sbFetch('categorias','POST',c);}catch(e){}}
+      for(const l of INITIAL_LANC){try{await sbFetch('lancamentos','POST',l);}catch(e){}}
+      setSyncStatus('online','Sincronizado');
+    }catch(e){setSyncStatus('error','Erro no reset da nuvem');}
+  }
   saveLocal();renderCfg();toast('Dados resetados ✓','ok');
 }
 
