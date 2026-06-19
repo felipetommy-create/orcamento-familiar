@@ -463,7 +463,10 @@ const INITIAL_LANC=[
 
 // ── STATE ──────────────────────────────────────────────────
 let S={lancamentos:[],categorias:[],brlRate:31.72,rateTS:'',taxas:{}};
-let SB=null,useCloud=false,curMonth='Maio',curTipo='despesa';
+let SB=null,useCloud=false,curTipo='despesa';
+// Set current month as default
+const _nowMonth=new Date().getMonth(); // 0=Jan, 5=Jun
+let curMonth=ALL_MONTHS[_nowMonth]||'Junho';
 let charts={},pendingDel=null;
 
 // ── UTILS ──────────────────────────────────────────────────
