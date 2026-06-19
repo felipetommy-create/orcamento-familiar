@@ -294,6 +294,8 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
   <div class="sec-label">Status dos dados</div>
   <div class="chart-card" id="dataStatus" style="font-size:13px;color:var(--muted);line-height:1.8"></div>
   <button class="btn-add" style="margin-top:10px" onclick="openSetup()">⚙ Reconfigurar conexão</button>
+  <button class="btn-add" style="margin-top:8px;background:var(--green);color:#0f172a" onclick="syncMissing()">☁ Sincronizar dados sem apagar</button>
+  <div style="font-size:11px;color:var(--muted);margin-top:4px;margin-bottom:10px">Insere no Supabase apenas registros que ainda não existem (Junho, etc.)</div>
   <div class="danger-card">
     <div class="dt">⚠ Zona de perigo</div>
     <p>Apaga todos os dados locais e restaura apenas Abril, Maio e Junho originais.</p>
@@ -501,8 +503,14 @@ async function cloudLoad(){
     ]);
     S.lancamentos=lancs;
     S.categorias=cats.length>0?cats:JSON.parse(JSON.stringify(INITIAL_CATS));
-    // ensure items array exists
-    S.categorias.forEach(c=>{if(!c.items)c.items=[];});
+    // Merge items from INITIAL_CATS (Supabase column may not store array)
+    S.categorias.forEach(c=>{
+      if(typeof c.items==='string'){try{c.items=JSON.parse(c.items);}catch(e){c.items=[];}}
+      if(!c.items||c.items.length===0){
+        const init=INITIAL_CATS.find(ic=>ic.id===c.id);
+        c.items=init?JSON.parse(JSON.stringify(init.items)):[];
+      }
+    });
     const rr=cfgs.find(c=>c.key==='brlRate'),rt=cfgs.find(c=>c.key==='rateTS'),tx=cfgs.find(c=>c.key==='taxas');
     if(rr)S.brlRate=parseFloat(rr.value);
     if(rt)S.rateTS=rt.value;
@@ -683,18 +691,22 @@ function entryHTML(x,color){
 
 function onCatChange(){
   const catId=document.getElementById('fCat').value;
-  const cat=getCat(catId);
-  const items=cat.items||[];
+  // First try from S.categorias, then fallback to INITIAL_CATS
+  let cat=S.categorias.find(c=>c.id===catId);
+  if(!cat||!cat.items||cat.items.length===0){
+    const init=INITIAL_CATS.find(ic=>ic.id===catId);
+    if(init&&(!cat)){cat=init;}
+    else if(init&&cat){cat.items=init.items;}
+  }
+  const items=(cat&&cat.items)||[];
   const sel=document.getElementById('fSubitem');
   if(items.length>0){
     sel.style.display='block';
-    sel.innerHTML='<option value="">— Selecione o item —</option>'+items.map(i=>`<option value="${i}">${i}</option>`).join('');
-    sel.onchange=()=>{
-      const v=sel.value;
-      if(v)document.getElementById('fDesc').value=v;
-    };
+    sel.innerHTML='<option value="">— Selecione o local/serviço —</option>'+items.map(i=>`<option value="${i}">${i}</option>`).join('');
+    sel.onchange=()=>{const v=sel.value;if(v)document.getElementById('fDesc').value=v;};
   } else {
     sel.style.display='none';
+    document.getElementById('fDesc').placeholder='Descreva o lançamento...';
   }
 }
 
@@ -894,6 +906,23 @@ function renderCfg(){
     html+=`<p style="margin-bottom:5px">• <strong style="color:var(--text)">${m}</strong>: ${nd} despesas · ${ne} entradas · <span style="color:${sl>=0?'var(--green)':'var(--red)'}">¥${fmt(sl)}</span></p>`;
   });
   document.getElementById('dataStatus').innerHTML=html||'<span>Nenhum dado ainda.</span>';
+}
+async function syncMissing(){
+  if(!useCloud||!SB){toast('Conecte ao Supabase primeiro','err');return;}
+  setSyncStatus('syncing','Sincronizando dados...');
+  let inserted=0,skipped=0;
+  const existing=new Set(S.lancamentos.map(l=>l.id));
+  for(const l of INITIAL_LANC){
+    if(!existing.has(l.id)){
+      try{await cloudInsert(l);S.lancamentos.push(l);inserted++;}
+      catch(e){skipped++;}
+    } else { skipped++; }
+  }
+  saveLocal();
+  setSyncStatus('online','Sincronizado');
+  renderCfg();
+  toast(inserted+' lançamentos inseridos, '+skipped+' já existiam','ok');
+  goPage('dashboard');
 }
 async function resetData(){
   if(!confirm('Apagar tudo e restaurar dados iniciais?'))return;
