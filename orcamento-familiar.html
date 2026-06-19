@@ -24,163 +24,156 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{background:var(--bg)}
 body{font-family:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;padding-bottom:calc(68px + var(--safe-b));overflow-x:hidden}
-
-/* SETUP SCREEN */
-#setupScreen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center}
-#setupScreen h1{font-size:32px;font-weight:700;margin-bottom:8px}
-#setupScreen p{color:var(--muted);font-size:14px;margin-bottom:32px;line-height:1.6}
-.setup-card{background:var(--surface);border:.5px solid var(--border2);border-radius:var(--radius);padding:20px;width:100%;max-width:400px;text-align:left;margin-bottom:16px}
-.setup-card h3{font-size:14px;font-weight:600;margin-bottom:12px;color:var(--accent)}
-.setup-card p{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px}
-.setup-input{background:var(--surface2);border:.5px solid var(--border2);border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:var(--text);width:100%;margin-bottom:8px;font-family:monospace}
+/* SETUP */
+#setupScreen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;overflow-y:auto}
+#setupScreen h1{font-size:28px;font-weight:700;margin-bottom:8px}
+#setupScreen p{color:var(--muted);font-size:13px;margin-bottom:24px;line-height:1.6}
+.setup-card{background:var(--surface);border:.5px solid var(--border2);border-radius:var(--radius);padding:20px;width:100%;max-width:420px;text-align:left;margin-bottom:12px}
+.setup-card h3{font-size:13px;font-weight:600;margin-bottom:10px;color:var(--accent)}
+.setup-card p{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px}
+.setup-input{background:var(--surface2);border:.5px solid var(--border2);border-radius:var(--radius-sm);padding:11px 13px;font-size:13px;color:var(--text);width:100%;margin-bottom:7px;font-family:monospace}
 .setup-input:focus{outline:none;border-color:var(--accent)}
-.btn-setup{background:var(--accent);color:#0f172a;border:none;border-radius:var(--radius-sm);padding:14px;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-top:4px}
-.btn-setup:active{opacity:.85}
-.btn-skip{background:none;border:.5px solid var(--border2);border-radius:var(--radius-sm);padding:12px;font-size:13px;color:var(--muted);cursor:pointer;width:100%;margin-top:8px}
-.setup-step{font-size:11px;color:var(--muted);text-align:center;margin-top:8px}
-.setup-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--muted);font-size:11px}
+.btn-setup{background:var(--accent);color:#0f172a;border:none;border-radius:var(--radius-sm);padding:13px;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-top:4px}
+.btn-skip{background:none;border:.5px solid var(--border2);border-radius:var(--radius-sm);padding:11px;font-size:13px;color:var(--muted);cursor:pointer;width:100%;margin-top:7px}
+.setup-divider{display:flex;align-items:center;gap:10px;margin:12px 0;color:var(--muted);font-size:11px}
 .setup-divider::before,.setup-divider::after{content:'';flex:1;height:.5px;background:var(--border2)}
-
 /* NAV */
 .nav{position:fixed;bottom:0;left:0;right:0;background:rgba(15,23,42,0.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:.5px solid var(--border2);display:flex;padding-bottom:var(--safe-b);z-index:100}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;background:none;border:none;color:var(--muted);font-size:10px;cursor:pointer;transition:color .15s}
 .nav-btn.active{color:var(--accent)}
 .nav-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-
 /* PAGES */
 .page{display:none;padding:16px;padding-top:calc(var(--safe-t) + 16px);max-width:680px;margin:0 auto}
 .page.active{display:block}
-.page-header{margin-bottom:18px}
-.page-header h1{font-size:26px;font-weight:700;letter-spacing:-.5px}
-.page-header p{font-size:13px;color:var(--muted);margin-top:2px}
-
-/* SYNC STATUS */
-.sync-bar{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-bottom:14px}
+.page-header{margin-bottom:16px}
+.page-header h1{font-size:24px;font-weight:700;letter-spacing:-.5px}
+.page-header p{font-size:12px;color:var(--muted);margin-top:2px}
+/* SYNC */
+.sync-bar{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-bottom:12px}
 .sync-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .3s}
-.sync-dot.online{background:var(--green)}
-.sync-dot.syncing{background:#fbbf24;animation:pulse .8s infinite}
-.sync-dot.error{background:var(--red)}
+.sync-dot.online{background:var(--green)}.sync-dot.syncing{background:#fbbf24;animation:pulse .8s infinite}.sync-dot.error{background:var(--red)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-
-/* MONTH PILLS */
-.month-scroll{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;scrollbar-width:none}
+/* PILLS */
+.month-scroll{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none}
 .month-scroll::-webkit-scrollbar{display:none}
-.mpill{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--muted);transition:all .15s;white-space:nowrap}
+.mpill{flex-shrink:0;padding:6px 13px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--muted);transition:all .15s;white-space:nowrap}
 .mpill.active{background:var(--accent);border-color:var(--accent);color:#0f172a}
 .mpill.anual.active{background:#7c3aed;border-color:#7c3aed;color:#fff}
-
 /* METRICS */
-.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
-.metric{background:var(--surface);border-radius:var(--radius);padding:14px;border:.5px solid var(--border)}
-.metric .lb{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
-.metric .vl{font-size:18px;font-weight:700;letter-spacing:-.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.metric{background:var(--surface);border-radius:var(--radius);padding:13px;border:.5px solid var(--border)}
+.metric .lb{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+.metric .vl{font-size:17px;font-weight:700;letter-spacing:-.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .metric .sb{font-size:10px;color:var(--muted);margin-top:2px}
 .metric.pos .vl{color:var(--green)}.metric.neg .vl{color:var(--red)}.metric.acc .vl{color:var(--accent)}
-
-/* CHART CARD */
-.chart-card{background:var(--surface);border-radius:var(--radius);padding:16px;border:.5px solid var(--border);margin-bottom:12px}
-.chart-card .ct{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px}
-
-/* ENTRY LIST */
-.sec-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:18px 0 10px}
-.entry-list{display:flex;flex-direction:column;gap:6px}
-.entry-item{background:var(--surface);border-radius:var(--radius-sm);padding:12px 14px;border:.5px solid var(--border);display:flex;align-items:center;gap:10px;transition:opacity .2s}
-.entry-item.deleting{opacity:.4}
+/* CHARTS */
+.chart-card{background:var(--surface);border-radius:var(--radius);padding:14px;border:.5px solid var(--border);margin-bottom:11px}
+.chart-card .ct{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+/* ENTRIES */
+.sec-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:16px 0 8px}
+.entry-list{display:flex;flex-direction:column;gap:5px}
+.entry-item{background:var(--surface);border-radius:var(--radius-sm);padding:11px 13px;border:.5px solid var(--border);display:flex;align-items:center;gap:9px;transition:opacity .2s}
+.entry-item.deleting{opacity:.3}
 .ei-cat{width:8px;height:8px;border-radius:2px;flex-shrink:0}
 .ei-info{flex:1;min-width:0}
 .ei-desc{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ei-meta{font-size:11px;color:var(--muted);margin-top:2px}
-.ei-amount{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0}
+.ei-sub{font-size:11px;color:var(--accent);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ei-meta{font-size:11px;color:var(--muted);margin-top:1px}
+.ei-amount{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0}
 .ei-del{background:none;border:none;cursor:pointer;padding:6px;font-size:20px;line-height:1;color:var(--muted);flex-shrink:0;border-radius:6px;transition:all .15s}
 .ei-del:active,.ei-del:hover{color:var(--red);background:var(--red-dim)}
-
-/* QUICK ADD */
-.quick-add{background:var(--surface);border-radius:var(--radius);border:.5px solid var(--border);overflow:hidden;margin-bottom:18px}
+/* FORM */
+.quick-add{background:var(--surface);border-radius:var(--radius);border:.5px solid var(--border);overflow:hidden;margin-bottom:16px}
 .qa-type{display:flex;border-bottom:.5px solid var(--border)}
-.qa-type button{flex:1;padding:14px;background:none;border:none;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s;border-bottom:2px solid transparent}
+.qa-type button{flex:1;padding:13px;background:none;border:none;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s;border-bottom:2px solid transparent}
 .qa-type .dep.active{color:var(--red);border-bottom-color:var(--red)}
 .qa-type .ent.active{color:var(--green);border-bottom-color:var(--green)}
-.qa-body{padding:14px;display:flex;flex-direction:column;gap:10px}
-.qa-input{background:var(--surface2);border:.5px solid var(--border2);border-radius:var(--radius-sm);padding:13px 14px;font-size:15px;color:var(--text);width:100%;-webkit-appearance:none;font-family:inherit}
+.qa-body{padding:13px;display:flex;flex-direction:column;gap:9px}
+.qa-input{background:var(--surface2);border:.5px solid var(--border2);border-radius:var(--radius-sm);padding:12px 13px;font-size:15px;color:var(--text);width:100%;-webkit-appearance:none;font-family:inherit}
 .qa-input::placeholder{color:var(--muted)}
 .qa-input:focus{outline:none;border-color:var(--accent)}
 select.qa-input{cursor:pointer}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.btn-add{background:var(--accent);color:#0f172a;border:none;border-radius:var(--radius-sm);padding:15px;font-size:15px;font-weight:700;cursor:pointer;width:100%;transition:opacity .15s}
-.btn-add:active{opacity:.85}
-.btn-add.verde{background:var(--green)}
-
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.btn-add{background:var(--accent);color:#0f172a;border:none;border-radius:var(--radius-sm);padding:14px;font-size:15px;font-weight:700;cursor:pointer;width:100%;transition:opacity .15s}
+.btn-add:active{opacity:.85}.btn-add.verde{background:var(--green)}
 /* CONVERSOR */
-.conv-card{background:var(--surface);border-radius:var(--radius);padding:16px;border:.5px solid var(--border);margin-bottom:12px}
-.rate-display{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.rate-big{font-size:22px;font-weight:700;color:var(--accent)}
-.rate-sub{font-size:11px;color:var(--muted)}
-.rate-btn{background:var(--surface2);border:.5px solid var(--border2);border-radius:var(--radius-sm);padding:8px 14px;font-size:12px;color:var(--accent);cursor:pointer;font-weight:600}
-.conv-result-big{font-size:30px;font-weight:700;letter-spacing:-1px;margin-top:10px;padding:0 4px}
-
-/* CATS */
-.cat-row{background:var(--surface);border-radius:var(--radius-sm);padding:12px 14px;border:.5px solid var(--border);display:flex;align-items:center;gap:10px;margin-bottom:6px}
-.cat-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
-.cat-del{background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;padding:4px;border-radius:6px}
-.cat-del:hover{color:var(--red);background:var(--red-dim)}
-
-/* CONFIRM MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:flex;align-items:flex-end;justify-content:center;padding:16px;padding-bottom:calc(16px + var(--safe-b))}
+.conv-card{background:var(--surface);border-radius:var(--radius);padding:16px;border:.5px solid var(--border);margin-bottom:11px}
+.rate-display{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.rate-big{font-size:20px;font-weight:700;color:var(--accent)}
+.rate-sub{font-size:10px;color:var(--muted)}
+.rate-btn{background:var(--surface2);border:.5px solid var(--border2);border-radius:var(--radius-sm);padding:8px 13px;font-size:12px;color:var(--accent);cursor:pointer;font-weight:600}
+.conv-result-big{font-size:28px;font-weight:700;letter-spacing:-1px;margin-top:8px;padding:0 3px}
+/* CATS / ITEMS */
+.cat-row{background:var(--surface);border-radius:var(--radius-sm);padding:11px 13px;border:.5px solid var(--border);display:flex;align-items:center;gap:9px;margin-bottom:5px;cursor:pointer;transition:border-color .15s}
+.cat-row:hover{border-color:var(--border2)}
+.cat-row.expanded{border-color:var(--accent)}
+.cat-dot{width:11px;height:11px;border-radius:3px;flex-shrink:0}
+.cat-chevron{font-size:11px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.cat-chevron.open{transform:rotate(90deg)}
+.cat-items-panel{background:var(--surface2);border-radius:0 0 var(--radius-sm) var(--radius-sm);border:.5px solid var(--accent);border-top:none;padding:10px 13px;margin-top:-5px;margin-bottom:5px;display:none}
+.cat-items-panel.open{display:block}
+.item-tag{display:inline-flex;align-items:center;gap:5px;background:var(--surface);border:.5px solid var(--border2);border-radius:20px;padding:4px 10px;font-size:12px;margin:3px;cursor:pointer}
+.item-tag .del-item{color:var(--muted);font-size:14px;line-height:1}
+.item-tag:hover .del-item{color:var(--red)}
+.add-item-row{display:flex;gap:6px;margin-top:8px}
+.add-item-row input{flex:1;background:var(--surface);border:.5px solid var(--border2);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;color:var(--text)}
+.add-item-row input:focus{outline:none;border-color:var(--accent)}
+.add-item-btn{background:var(--accent);color:#0f172a;border:none;border-radius:var(--radius-sm);padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;display:flex;align-items:flex-end;justify-content:center;padding:16px;padding-bottom:calc(16px + var(--safe-b))}
 .modal-box{background:var(--surface);border-radius:var(--radius);padding:20px;width:100%;max-width:420px;border:.5px solid var(--border2)}
-.modal-box h3{font-size:16px;font-weight:600;margin-bottom:8px}
-.modal-box p{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5}
-.modal-item{background:var(--surface2);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:14px;font-size:13px}
+.modal-box h3{font-size:15px;font-weight:600;margin-bottom:6px}
+.modal-box p{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+.modal-item{background:var(--surface2);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:12px;font-size:13px}
 .modal-item .mi-desc{font-weight:500}
-.modal-item .mi-val{color:var(--red);font-weight:700;font-size:15px;margin-top:2px}
+.modal-item .mi-val{font-weight:700;font-size:15px;margin-top:2px}
 .modal-actions{display:flex;gap:8px}
 .modal-actions button{flex:1;padding:13px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;border:none}
 .btn-cancel{background:var(--surface2);color:var(--text)}
 .btn-confirm-del{background:var(--red);color:#fff}
-
 /* TOAST */
-.toast{position:fixed;top:calc(var(--safe-t) + 12px);left:50%;transform:translateX(-50%) translateY(-80px);background:var(--surface);border:.5px solid var(--border2);color:var(--text);padding:12px 20px;border-radius:30px;font-size:13px;font-weight:500;z-index:999;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.toast{position:fixed;top:calc(var(--safe-t) + 12px);left:50%;transform:translateX(-50%) translateY(-80px);background:var(--surface);border:.5px solid var(--border2);color:var(--text);padding:11px 18px;border-radius:30px;font-size:13px;font-weight:500;z-index:999;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.4)}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .toast.ok{color:var(--green)}.toast.err{color:var(--red)}
-
 /* TABLE */
 table.st{width:100%;border-collapse:collapse;font-size:12px}
-table.st th{text-align:left;padding:8px 10px;color:var(--muted);font-weight:400;font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:.5px solid var(--border)}
-table.st td{padding:8px 10px;border-bottom:.5px solid var(--border)}
+table.st th{text-align:left;padding:7px 9px;color:var(--muted);font-weight:400;font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:.5px solid var(--border)}
+table.st td{padding:7px 9px;border-bottom:.5px solid var(--border)}
 table.st tr:last-child td{border-bottom:none}
 table.st .r{text-align:right;font-variant-numeric:tabular-nums}
-.pie-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
-.pie-legend span{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted)}
+.pie-legend{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
+.pie-legend span{display:flex;align-items:center;gap:3px;font-size:11px;color:var(--muted)}
 .pie-dot{width:8px;height:8px;border-radius:2px}
-.empty{text-align:center;padding:28px 16px;color:var(--muted);font-size:13px}
-.danger-card{background:rgba(248,113,113,0.06);border:.5px solid rgba(248,113,113,0.2);border-radius:var(--radius);padding:16px;margin-top:16px}
-.danger-card .dt{font-size:11px;color:var(--red);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;font-weight:600}
-.danger-card p{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5}
-.btn-danger{background:none;border:1px solid var(--red);border-radius:var(--radius-sm);padding:10px 16px;font-size:13px;color:var(--red);cursor:pointer;font-weight:600}
-.info-card{background:var(--accent-dim);border:.5px solid rgba(56,189,248,.2);border-radius:var(--radius);padding:14px;margin-bottom:12px;font-size:12px;color:var(--muted);line-height:1.6}
+.empty{text-align:center;padding:24px 16px;color:var(--muted);font-size:13px}
+.danger-card{background:rgba(248,113,113,0.06);border:.5px solid rgba(248,113,113,0.2);border-radius:var(--radius);padding:14px;margin-top:14px}
+.danger-card .dt{font-size:10px;color:var(--red);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;font-weight:600}
+.danger-card p{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.5}
+.btn-danger{background:none;border:1px solid var(--red);border-radius:var(--radius-sm);padding:9px 14px;font-size:13px;color:var(--red);cursor:pointer;font-weight:600}
+.info-card{background:var(--accent-dim);border:.5px solid rgba(56,189,248,.2);border-radius:var(--radius);padding:13px;margin-bottom:11px;font-size:12px;color:var(--muted);line-height:1.7}
 .info-card strong{color:var(--accent)}
 </style>
 </head>
 <body>
 
-<!-- SETUP SCREEN -->
+<!-- SETUP -->
 <div id="setupScreen" style="display:none">
-  <div style="font-size:48px;margin-bottom:12px">家計</div>
+  <div style="font-size:44px;margin-bottom:10px">家計</div>
   <h1>Orçamento Familiar</h1>
-  <p>Para sincronizar entre iPhone e PC,<br>conecte ao Supabase (gratuito).<br>Ou use só localmente.</p>
-
+  <p>Conecte ao Supabase para sincronizar<br>entre iPhone e PC.</p>
   <div class="setup-card">
-    <h3>🌐 Conectar ao Supabase (sincronização)</h3>
-    <p>Crie uma conta gratuita em <strong>supabase.com</strong>, crie um projeto e cole as credenciais abaixo.</p>
+    <h3>🌐 Conectar ao Supabase</h3>
+    <p>Cole as credenciais do seu projeto.</p>
     <input class="setup-input" id="sbUrl" placeholder="URL do projeto (https://xxx.supabase.co)" />
-    <input class="setup-input" id="sbKey" placeholder="Anon/public key" />
+    <input class="setup-input" id="sbKey" placeholder="Chave publicável (sb_publishable_...)" />
     <button class="btn-setup" onclick="connectSupabase()">Conectar e sincronizar</button>
     <div class="setup-divider">ou</div>
-    <button class="btn-skip" onclick="useLocal()">Usar só localmente (sem sincronização)</button>
+    <button class="btn-skip" onclick="useLocal()">Usar só localmente</button>
   </div>
-  <div class="setup-step" id="setupMsg"></div>
+  <div style="font-size:11px;color:var(--muted);margin-top:8px" id="setupMsg"></div>
 </div>
 
-<!-- CONFIRM DELETE MODAL -->
+<!-- DELETE MODAL -->
 <div class="modal-overlay" id="delModal" style="display:none">
   <div class="modal-box">
     <h3>Apagar lançamento?</h3>
@@ -209,16 +202,16 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
   <div class="metrics" id="metrics-d"></div>
   <div class="chart-card">
     <div class="ct">Entradas vs saídas (¥)</div>
-    <div style="position:relative;height:200px"><canvas id="barChart" role="img" aria-label="Entradas e saídas mensais"></canvas></div>
+    <div style="position:relative;height:190px"><canvas id="barChart" role="img" aria-label="Entradas e saídas mensais"></canvas></div>
   </div>
   <div class="chart-card">
     <div class="ct">Por categoria</div>
     <div class="pie-legend" id="pieLeg"></div>
-    <div style="position:relative;height:180px"><canvas id="pieChart" role="img" aria-label="Gastos por categoria"></canvas></div>
+    <div style="position:relative;height:170px"><canvas id="pieChart" role="img" aria-label="Por categoria"></canvas></div>
   </div>
   <div class="chart-card">
     <div class="ct">Saldo acumulado no ano (¥)</div>
-    <div style="position:relative;height:150px"><canvas id="lineChart" role="img" aria-label="Saldo acumulado"></canvas></div>
+    <div style="position:relative;height:140px"><canvas id="lineChart" role="img" aria-label="Saldo acumulado"></canvas></div>
   </div>
   <div class="sec-label">Maiores despesas</div>
   <div class="entry-list" id="topList"></div>
@@ -233,36 +226,35 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
       <button class="ent" id="btnEnt" onclick="setTipo('entrada')">↓ Entrada</button>
     </div>
     <div class="qa-body">
-      <input class="qa-input" id="fDesc" placeholder="Ex: Supermercado Valor" autocomplete="off" />
-      <div class="row2">
-        <input class="qa-input" id="fValor" type="number" inputmode="decimal" placeholder="Valor ¥" min="0" />
-        <input class="qa-input" id="fDia" type="number" inputmode="numeric" placeholder="Dia" min="1" max="31" />
-      </div>
       <div class="row2">
         <select class="qa-input" id="fMes"></select>
-        <select class="qa-input" id="fCat"></select>
+        <input class="qa-input" id="fDia" type="number" inputmode="numeric" placeholder="Dia" min="1" max="31" />
       </div>
+      <select class="qa-input" id="fCat" onchange="onCatChange()"></select>
+      <select class="qa-input" id="fSubitem" style="display:none"></select>
+      <input class="qa-input" id="fDesc" placeholder="Ou descreva manualmente..." autocomplete="off" />
+      <input class="qa-input" id="fValor" type="number" inputmode="decimal" placeholder="Valor em ¥" min="0" />
       <button class="btn-add" id="addBtn" onclick="addEntry()">+ Registrar</button>
     </div>
   </div>
   <div class="month-scroll" id="msel-l"></div>
   <div class="sec-label">Saídas — <span id="lblMesD"></span></div>
   <div class="entry-list" id="listD"></div>
-  <div class="sec-label" style="margin-top:20px">Entradas — <span id="lblMesE"></span></div>
+  <div class="sec-label" style="margin-top:18px">Entradas — <span id="lblMesE"></span></div>
   <div class="entry-list" id="listE"></div>
 </div>
 
 <!-- CATEGORIAS -->
 <div id="page-categorias" class="page">
-  <div class="page-header"><h1>Categorias</h1><p>Organize seus gastos</p></div>
-  <div class="sec-label">Suas categorias</div>
+  <div class="page-header"><h1>Categorias</h1><p>Gerencie categorias e subitens</p></div>
+  <div class="sec-label">Suas categorias e itens</div>
   <div id="catGrid"></div>
   <div class="row2" style="margin-top:10px;gap:8px">
     <input class="qa-input" id="nCatNome" placeholder="Nova categoria" />
     <input type="color" id="nCatCor" value="#38bdf8" style="width:100%;height:44px;border-radius:var(--radius-sm);border:.5px solid var(--border2);cursor:pointer;padding:4px;background:var(--surface2)" />
   </div>
   <button class="btn-add" style="margin-top:8px" onclick="addCat()">+ Criar categoria</button>
-  <div class="sec-label" style="margin-top:24px">Resumo anual por categoria</div>
+  <div class="sec-label" style="margin-top:22px">Resumo anual por categoria</div>
   <div style="overflow-x:auto"><table class="st" id="anualTbl"><thead></thead><tbody></tbody></table></div>
 </div>
 
@@ -274,18 +266,18 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
       <div><div class="rate-big" id="rateDisplay">¥ — / R$</div><div class="rate-sub" id="rateTS"></div></div>
       <button class="rate-btn" onclick="fetchRate()">↻ Atualizar</button>
     </div>
-    <div style="margin-bottom:14px">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Real (R$)</div>
-      <input class="qa-input" id="inBRL" type="number" inputmode="decimal" placeholder="0,00" oninput="cvBRL()" style="font-size:22px;font-weight:700" />
+    <div style="margin-bottom:13px">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">Real (R$)</div>
+      <input class="qa-input" id="inBRL" type="number" inputmode="decimal" placeholder="0,00" oninput="cvBRL()" style="font-size:20px;font-weight:700" />
       <div class="conv-result-big" id="outYEN" style="color:var(--green)">¥ —</div>
-      <div style="font-size:11px;color:var(--muted);padding:0 4px;margin-top:3px" id="outYENsm"></div>
+      <div style="font-size:11px;color:var(--muted);padding:0 3px;margin-top:2px" id="outYENsm"></div>
     </div>
-    <div style="height:.5px;background:var(--border);margin:16px 0"></div>
+    <div style="height:.5px;background:var(--border);margin:14px 0"></div>
     <div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Iene (¥)</div>
-      <input class="qa-input" id="inYEN" type="number" inputmode="numeric" placeholder="0" oninput="cvYEN()" style="font-size:22px;font-weight:700" />
+      <div style="font-size:10px;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">Iene (¥)</div>
+      <input class="qa-input" id="inYEN" type="number" inputmode="numeric" placeholder="0" oninput="cvYEN()" style="font-size:20px;font-weight:700" />
       <div class="conv-result-big" id="outBRL" style="color:var(--accent)">R$ —</div>
-      <div style="font-size:11px;color:var(--muted);padding:0 4px;margin-top:3px" id="outBRLsm"></div>
+      <div style="font-size:11px;color:var(--muted);padding:0 3px;margin-top:2px" id="outBRLsm"></div>
     </div>
   </div>
   <div class="sec-label">Cotações registradas</div>
@@ -300,24 +292,16 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
   <div class="page-header"><h1>Configurações</h1><p>Dados e sincronização</p></div>
   <div class="info-card" id="connInfo">Carregando...</div>
   <div class="sec-label">Status dos dados</div>
-  <div class="chart-card" id="dataStatus" style="font-size:13px;color:var(--muted);line-height:1.7"></div>
-  <div class="sec-label" style="margin-top:20px">Instruções Supabase</div>
-  <div class="chart-card" style="font-size:12px;color:var(--muted);line-height:1.8">
-    <p style="margin-bottom:8px"><strong style="color:var(--text)">1.</strong> Acesse <strong style="color:var(--accent)">supabase.com</strong> → New project</p>
-    <p style="margin-bottom:8px"><strong style="color:var(--text)">2.</strong> SQL Editor → New query → cole o SQL abaixo e execute</p>
-    <p style="margin-bottom:8px"><strong style="color:var(--text)">3.</strong> Settings → API → copie URL e anon key</p>
-    <p style="margin-bottom:8px"><strong style="color:var(--text)">4.</strong> Cole no app e clique "Conectar"</p>
-    <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px;margin-top:10px;font-family:monospace;font-size:11px;line-height:1.6;color:var(--accent)" id="sqlBlock"></div>
-  </div>
-  <button class="btn-add" style="margin-top:12px" onclick="openSetup()">⚙ Reconfigurar conexão</button>
+  <div class="chart-card" id="dataStatus" style="font-size:13px;color:var(--muted);line-height:1.8"></div>
+  <button class="btn-add" style="margin-top:10px" onclick="openSetup()">⚙ Reconfigurar conexão</button>
   <div class="danger-card">
     <div class="dt">⚠ Zona de perigo</div>
-    <p>Apaga todos os dados locais e restaura apenas Abril e Maio originais da planilha.</p>
+    <p>Apaga todos os dados locais e restaura apenas Abril, Maio e Junho originais.</p>
     <button class="btn-danger" onclick="resetData()">Resetar todos os dados</button>
   </div>
 </div>
 
-<!-- BOTTOM NAV -->
+<!-- NAV -->
 <nav class="nav">
   <button class="nav-btn active" onclick="goPage('dashboard')">
     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard
@@ -337,336 +321,274 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
 </nav>
 
 <script>
-// ═══════════════════════════════════════════
-// CONSTANTS & INITIAL DATA
-// ═══════════════════════════════════════════
-const LS_KEY = 'kazoku-yosan-v4';
-const LS_SB  = 'kazoku-supabase';
-const ALL_MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const PAGES = ['dashboard','lancamentos','categorias','conversor','config'];
+const LS_KEY='kazoku-v5', LS_SB='kazoku-sb';
+const ALL_MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const PAGES=['dashboard','lancamentos','categorias','conversor','config'];
 
-const SQL_SETUP = `-- Execute no SQL Editor do Supabase
-create table if not exists lancamentos (
-  id text primary key,
-  mes text not null,
-  tipo text not null,
-  descricao text not null,
-  valor numeric not null,
-  dia integer default 0,
-  cat text not null,
-  created_at timestamptz default now()
-);
-create table if not exists categorias (
-  id text primary key,
-  name text not null,
-  color text not null,
-  ord integer default 0
-);
-create table if not exists config (
-  key text primary key,
-  value text not null
-);
-alter table lancamentos enable row level security;
-alter table categorias enable row level security;
-alter table config enable row level security;
-create policy "public read" on lancamentos for select using (true);
-create policy "public insert" on lancamentos for insert with check (true);
-create policy "public update" on lancamentos for update using (true);
-create policy "public delete" on lancamentos for delete using (true);
-create policy "public read" on categorias for select using (true);
-create policy "public insert" on categorias for insert with check (true);
-create policy "public update" on categorias for update using (true);
-create policy "public delete" on categorias for delete using (true);
-create policy "public read" on config for select using (true);
-create policy "public insert" on config for insert with check (true);
-create policy "public update" on config for update using (true);`;
-
-const INITIAL_CATS = [
-  {id:'housing',name:'Moradia',color:'#38bdf8',ord:0},
-  {id:'food',name:'Alimentação',color:'#34d399',ord:1},
-  {id:'bills',name:'Contas fixas',color:'#fbbf24',ord:2},
-  {id:'health',name:'Saúde/Seguro',color:'#f472b6',ord:3},
-  {id:'edu',name:'Educação',color:'#a78bfa',ord:4},
-  {id:'transport',name:'Transporte',color:'#fb923c',ord:5},
-  {id:'income',name:'Receita',color:'#2dd4bf',ord:6},
-  {id:'other',name:'Outros',color:'#94a3b8',ord:7}
+// ── INITIAL CATEGORIES WITH SUBITEMS ──────────────────────
+const INITIAL_CATS=[
+  {id:'kombini',name:'🏪 Kombini',color:'#38bdf8',ord:0,items:['7-Eleven','Daily Yamazaki','FamilyMart','Lawson','MiniStop','Seijo Ishii']},
+  {id:'lojas',name:'🛍 Lojas',color:'#a78bfa',ord:1,items:['Mega Don Quijote','Daiso','Seria','Piago']},
+  {id:'academia',name:'🏋 Academia',color:'#fb923c',ord:2,items:['Anytime Fitness','Gold\'s Gym','ChocoZap']},
+  {id:'alimentacao',name:'🍱 Alimentação',color:'#34d399',ord:3,items:['Bento Box','Refeição Trabalho','Supermercado Pronto','Chikuya']},
+  {id:'saude',name:'🏥 Saúde e Bem-estar',color:'#f472b6',ord:4,items:['Consultas Médicas','iCloud','Tomod\'s','Remédios','Higiene/Cosméticos','Drugstore Cosmos']},
+  {id:'transporte',name:'🚌 Transporte',color:'#fbbf24',ord:5,items:['GO (Taxi App)','JapanTaxi','Velcia','JR Tokai (Trem)']},
+  {id:'mercado',name:'🛒 Mercado',color:'#2dd4bf',ord:6,items:['Kyorindo','Valor','Aeon','Gyomu Supe','Life','Cainz Home','Piago','Sakura SuperMarket','Ponto Brasil','Kyorindo']},
+  {id:'parcela',name:'📋 Parcela',color:'#60a5fa',ord:7,items:['Financiamento Casa','Empréstimo','Financiamento Carro']},
+  {id:'contas',name:'💡 Contas',color:'#fde68a',ord:8,items:['Água (Suido)','Gás (Gasu)','Luz (Denki)','Internet','NHK']},
+  {id:'assinaturas',name:'📱 Assinaturas',color:'#c4b5fd',ord:9,items:['Netflix','X','Amazon Prime','Spotify','YouTube Premium','Disney+','ElevenLabs']},
+  {id:'educacao',name:'📚 Educação',color:'#86efac',ord:10,items:['Mensalidade Escolar','Curso de Idiomas','Material Escolar','Taxi Escolar','Uniforme Escolar','Taxas Escolares']},
+  {id:'eletronicos',name:'💻 Eletrônicos',color:'#67e8f9',ord:11,items:['Bio Camera','Workman','Yamada Denki','Yodobashi Camera','Muji','H&M','Hobby-Off & Hard-Off']},
+  {id:'vestuario',name:'👗 Vestuário e Acessórios',color:'#fca5a5',ord:12,items:['Uniqlo','Piago','GU','Zara','Shimamura']},
+  {id:'restaurante',name:'🍜 Restaurante',color:'#fdba74',ord:13,items:['McDonald\'s','Yoshinoya','Starbucks','Sukiya','Hama Sushi']},
+  {id:'lazer',name:'🎮 Lazer',color:'#a5f3fc',ord:14,items:['Matsua','Saiteriga','Apollonicon','Karaoke','Cinema']},
+  {id:'gasolina',name:'⛽ Gasolina',color:'#d9f99d',ord:15,items:['Eneos','ZoopTown','Shell','Idemitsu']},
+  {id:'compras_online',name:'🛒 Compras Online',color:'#fbcfe8',ord:16,items:['Amazon JP','Linemo','Temu','Rakuten','Rakuten Mobile','UQ Mobile','Kirily']},
+  {id:'plano_tel',name:'📞 Plano Telefone',color:'#bfdbfe',ord:17,items:['Docomo','SoftBank','Au']},
+  {id:'seguro_carro',name:'🚗 Seguro Carro',color:'#ddd6fe',ord:18,items:['Mitsui Sumitomo','Seguro Operadora']},
+  {id:'seguro_tel',name:'📱 Seguro Telefone',color:'#99f6e4',ord:19,items:['Tokyo Marine','AppleCare','Sompo Japan']},
+  {id:'outros',name:'📦 Outros',color:'#94a3b8',ord:20,items:['Tarifas Bancárias','Diverso','Impostos','Transferência CNH','Dízimo','Doação','Oferta','Compra de Seguidores','Loteria Caixa','Serviço de Tradução','Lanche Igreja','Instrução Trânsito']},
+  {id:'income',name:'💰 Receita',color:'#4ade80',ord:21,items:['Aluguel Casa da Frente','Aluguel Casa de Trás','Salário','Freelance','Transferência']}
 ];
 
-const INITIAL_LANC = [
-  // ABRIL despesas
-  {id:'a1',mes:'Abril',tipo:'despesa',descricao:'Aluguel',valor:38000,dia:1,cat:'housing'},
-  {id:'a2',mes:'Abril',tipo:'despesa',descricao:'Seguro Nacional',valor:14300,dia:1,cat:'health'},
-  {id:'a3',mes:'Abril',tipo:'despesa',descricao:'Escola',valor:17600,dia:29,cat:'edu'},
-  {id:'a4',mes:'Abril',tipo:'despesa',descricao:'Alimentação Escolar',valor:12000,dia:1,cat:'edu'},
-  {id:'a5',mes:'Abril',tipo:'despesa',descricao:'Celular',valor:4980,dia:25,cat:'bills'},
-  {id:'a6',mes:'Abril',tipo:'despesa',descricao:'Internet',valor:5665,dia:25,cat:'bills'},
-  {id:'a7',mes:'Abril',tipo:'despesa',descricao:'Netflix',valor:1940,dia:1,cat:'other'},
-  {id:'a8',mes:'Abril',tipo:'despesa',descricao:'Eleven Labs',valor:4000,dia:1,cat:'other'},
-  {id:'a9',mes:'Abril',tipo:'despesa',descricao:'Disney Plus',valor:1060,dia:1,cat:'other'},
-  {id:'a10',mes:'Abril',tipo:'despesa',descricao:'Canva',valor:800,dia:1,cat:'other'},
-  {id:'a11',mes:'Abril',tipo:'despesa',descricao:'Uniforme escolar Eliza',valor:67480,dia:23,cat:'edu'},
-  {id:'a12',mes:'Abril',tipo:'despesa',descricao:'Ligação do Gás',valor:10000,dia:16,cat:'bills'},
-  {id:'a13',mes:'Abril',tipo:'despesa',descricao:'Entrada no apartamento',valor:190800,dia:13,cat:'housing'},
-  // MAIO despesas
-  {id:'m1',mes:'Maio',tipo:'despesa',descricao:'Aluguel',valor:38000,dia:1,cat:'housing'},
-  {id:'m2',mes:'Maio',tipo:'despesa',descricao:'Gás',valor:5757,dia:1,cat:'bills'},
-  {id:'m3',mes:'Maio',tipo:'despesa',descricao:'Seguro Nacional',valor:14300,dia:1,cat:'health'},
-  {id:'m4',mes:'Maio',tipo:'despesa',descricao:'Escola',valor:17600,dia:29,cat:'edu'},
-  {id:'m5',mes:'Maio',tipo:'despesa',descricao:'Alimentação Escolar',valor:12000,dia:1,cat:'edu'},
-  {id:'m6',mes:'Maio',tipo:'despesa',descricao:'Celular',valor:4980,dia:25,cat:'bills'},
-  {id:'m7',mes:'Maio',tipo:'despesa',descricao:'Internet',valor:5665,dia:25,cat:'bills'},
-  {id:'m8',mes:'Maio',tipo:'despesa',descricao:'Netflix',valor:1940,dia:1,cat:'other'},
-  {id:'m9',mes:'Maio',tipo:'despesa',descricao:'Eleven Labs',valor:4000,dia:1,cat:'other'},
-  {id:'m10',mes:'Maio',tipo:'despesa',descricao:'Disney Plus',valor:1060,dia:1,cat:'other'},
-  {id:'m11',mes:'Maio',tipo:'despesa',descricao:'Canva',valor:800,dia:1,cat:'other'},
-  {id:'m12',mes:'Maio',tipo:'despesa',descricao:'Kyorindo — Alimentação',valor:14429,dia:4,cat:'food'},
-  {id:'m13',mes:'Maio',tipo:'despesa',descricao:'Pagamento Sogro',valor:31250,dia:1,cat:'other'},
-  {id:'m14',mes:'Maio',tipo:'despesa',descricao:'Desintupimento Cano Brasil',valor:7813,dia:5,cat:'other'},
-  {id:'m15',mes:'Maio',tipo:'despesa',descricao:'Compras diversas',valor:7133,dia:6,cat:'food'},
-  {id:'m16',mes:'Maio',tipo:'despesa',descricao:'Almoço Sukiya',valor:4840,dia:6,cat:'food'},
-  {id:'m17',mes:'Maio',tipo:'despesa',descricao:'Compras para casa',valor:1087,dia:7,cat:'food'},
-  {id:'m18',mes:'Maio',tipo:'despesa',descricao:'Kyorindo',valor:1183,dia:7,cat:'food'},
-  {id:'m19',mes:'Maio',tipo:'despesa',descricao:'Filtro de água',valor:6460,dia:8,cat:'other'},
-  {id:'m20',mes:'Maio',tipo:'despesa',descricao:'Mega Donki',valor:1546,dia:8,cat:'food'},
-  {id:'m21',mes:'Maio',tipo:'despesa',descricao:'Guiomo Super',valor:3070,dia:8,cat:'food'},
-  {id:'m22',mes:'Maio',tipo:'despesa',descricao:'Supermercado Valor',valor:781,dia:8,cat:'food'},
-  {id:'m23',mes:'Maio',tipo:'despesa',descricao:'Uniforme, Seria, Piago',valor:7242,dia:11,cat:'edu'},
-  {id:'m24',mes:'Maio',tipo:'despesa',descricao:'Seven, Daiso, Kyorindo',valor:3735,dia:12,cat:'food'},
-  {id:'m25',mes:'Maio',tipo:'despesa',descricao:'Almoço Felipe Tommy',valor:1271,dia:13,cat:'food'},
-  {id:'m26',mes:'Maio',tipo:'despesa',descricao:'Seguidores Instagram',valor:6122,dia:13,cat:'other'},
-  {id:'m27',mes:'Maio',tipo:'despesa',descricao:'Oferta',valor:2000,dia:10,cat:'other'},
-  {id:'m28',mes:'Maio',tipo:'despesa',descricao:'Empréstimo Passagem',valor:63872,dia:1,cat:'transport'},
-  {id:'m29',mes:'Maio',tipo:'despesa',descricao:'Dízimo',valor:30000,dia:10,cat:'other'},
-  // MAIO entradas
-  {id:'me1',mes:'Maio',tipo:'entrada',descricao:'Aluguel Casa da Frente (Brasil)',valor:50752,dia:1,cat:'income'},
-  {id:'me2',mes:'Maio',tipo:'entrada',descricao:'Aluguel Casa de Trás (Brasil)',valor:31720,dia:5,cat:'income'},
-  {id:'me3',mes:'Maio',tipo:'entrada',descricao:'Pagamento Braz',valor:50715,dia:27,cat:'income'},
-  {id:'me4',mes:'Maio',tipo:'entrada',descricao:'Pagamento Junior do Macre',valor:47580,dia:1,cat:'income'},
-  {id:'me5',mes:'Maio',tipo:'entrada',descricao:'Pagamento Imprensa',valor:31720,dia:9,cat:'income'},
-  {id:'me6',mes:'Maio',tipo:'entrada',descricao:'Devolução Formigão',valor:47580,dia:10,cat:'income'},
-  {id:'me7',mes:'Maio',tipo:'entrada',descricao:'Contribuição água',valor:1269,dia:8,cat:'income'},
-  {id:'me8',mes:'Maio',tipo:'entrada',descricao:'Pagamento Anderson Moratório',valor:63440,dia:15,cat:'income'},
+// ── INITIAL LANCAMENTOS ────────────────────────────────────
+const INITIAL_LANC=[
+  {id:'a1',mes:'Abril',tipo:'despesa',descricao:'Aluguel',subitem:'',valor:38000,dia:1,cat:'outros'},
+  {id:'a2',mes:'Abril',tipo:'despesa',descricao:'Seguro Nacional',subitem:'',valor:14300,dia:1,cat:'saude'},
+  {id:'a3',mes:'Abril',tipo:'despesa',descricao:'Escola',subitem:'Mensalidade Escolar',valor:17600,dia:29,cat:'educacao'},
+  {id:'a4',mes:'Abril',tipo:'despesa',descricao:'Alimentação Escolar',subitem:'Mensalidade Escolar',valor:12000,dia:1,cat:'educacao'},
+  {id:'a5',mes:'Abril',tipo:'despesa',descricao:'Celular',subitem:'',valor:4980,dia:25,cat:'plano_tel'},
+  {id:'a6',mes:'Abril',tipo:'despesa',descricao:'Internet',subitem:'Internet',valor:5665,dia:25,cat:'contas'},
+  {id:'a7',mes:'Abril',tipo:'despesa',descricao:'Netflix',subitem:'Netflix',valor:1940,dia:1,cat:'assinaturas'},
+  {id:'a8',mes:'Abril',tipo:'despesa',descricao:'Eleven Labs',subitem:'ElevenLabs',valor:4000,dia:1,cat:'assinaturas'},
+  {id:'a9',mes:'Abril',tipo:'despesa',descricao:'Disney Plus',subitem:'Disney+',valor:1060,dia:1,cat:'assinaturas'},
+  {id:'a10',mes:'Abril',tipo:'despesa',descricao:'Canva',subitem:'',valor:800,dia:1,cat:'assinaturas'},
+  {id:'a11',mes:'Abril',tipo:'despesa',descricao:'Uniforme escolar Eliza',subitem:'Uniforme Escolar',valor:67480,dia:23,cat:'educacao'},
+  {id:'a12',mes:'Abril',tipo:'despesa',descricao:'Ligação do Gás',subitem:'Gás (Gasu)',valor:10000,dia:16,cat:'contas'},
+  {id:'a13',mes:'Abril',tipo:'despesa',descricao:'Entrada no apartamento',subitem:'',valor:190800,dia:13,cat:'parcela'},
+  {id:'m1',mes:'Maio',tipo:'despesa',descricao:'Aluguel',subitem:'',valor:38000,dia:1,cat:'outros'},
+  {id:'m2',mes:'Maio',tipo:'despesa',descricao:'Gás',subitem:'Gás (Gasu)',valor:5757,dia:1,cat:'contas'},
+  {id:'m3',mes:'Maio',tipo:'despesa',descricao:'Seguro Nacional',subitem:'',valor:14300,dia:1,cat:'saude'},
+  {id:'m4',mes:'Maio',tipo:'despesa',descricao:'Escola',subitem:'Mensalidade Escolar',valor:17600,dia:29,cat:'educacao'},
+  {id:'m5',mes:'Maio',tipo:'despesa',descricao:'Alimentação Escolar',subitem:'Mensalidade Escolar',valor:12000,dia:1,cat:'educacao'},
+  {id:'m6',mes:'Maio',tipo:'despesa',descricao:'Celular',subitem:'',valor:4980,dia:25,cat:'plano_tel'},
+  {id:'m7',mes:'Maio',tipo:'despesa',descricao:'Internet',subitem:'Internet',valor:5665,dia:25,cat:'contas'},
+  {id:'m8',mes:'Maio',tipo:'despesa',descricao:'Netflix',subitem:'Netflix',valor:1940,dia:1,cat:'assinaturas'},
+  {id:'m9',mes:'Maio',tipo:'despesa',descricao:'Eleven Labs',subitem:'ElevenLabs',valor:4000,dia:1,cat:'assinaturas'},
+  {id:'m10',mes:'Maio',tipo:'despesa',descricao:'Disney Plus',subitem:'Disney+',valor:1060,dia:1,cat:'assinaturas'},
+  {id:'m11',mes:'Maio',tipo:'despesa',descricao:'Canva',subitem:'',valor:800,dia:1,cat:'assinaturas'},
+  {id:'m12',mes:'Maio',tipo:'despesa',descricao:'Kyorindo',subitem:'Kyorindo',valor:14429,dia:4,cat:'mercado'},
+  {id:'m13',mes:'Maio',tipo:'despesa',descricao:'Pagamento Sogro',subitem:'',valor:31250,dia:1,cat:'outros'},
+  {id:'m14',mes:'Maio',tipo:'despesa',descricao:'Desintupimento Cano Brasil',subitem:'',valor:7813,dia:5,cat:'outros'},
+  {id:'m15',mes:'Maio',tipo:'despesa',descricao:'Compras diversas',subitem:'',valor:7133,dia:6,cat:'mercado'},
+  {id:'m16',mes:'Maio',tipo:'despesa',descricao:'Almoço Sukiya',subitem:'Sukiya',valor:4840,dia:6,cat:'restaurante'},
+  {id:'m17',mes:'Maio',tipo:'despesa',descricao:'Compras para casa',subitem:'',valor:1087,dia:7,cat:'mercado'},
+  {id:'m18',mes:'Maio',tipo:'despesa',descricao:'Kyorindo',subitem:'Kyorindo',valor:1183,dia:7,cat:'mercado'},
+  {id:'m19',mes:'Maio',tipo:'despesa',descricao:'Filtro de água',subitem:'',valor:6460,dia:8,cat:'outros'},
+  {id:'m20',mes:'Maio',tipo:'despesa',descricao:'Mega Donki',subitem:'Mega Don Quijote',valor:1546,dia:8,cat:'lojas'},
+  {id:'m21',mes:'Maio',tipo:'despesa',descricao:'Guiomo Super',subitem:'',valor:3070,dia:8,cat:'mercado'},
+  {id:'m22',mes:'Maio',tipo:'despesa',descricao:'Supermercado Valor',subitem:'Valor',valor:781,dia:8,cat:'mercado'},
+  {id:'m23',mes:'Maio',tipo:'despesa',descricao:'Uniforme, Seria, Piago',subitem:'',valor:7242,dia:11,cat:'educacao'},
+  {id:'m24',mes:'Maio',tipo:'despesa',descricao:'Seven, Daiso, Kyorindo',subitem:'',valor:3735,dia:12,cat:'kombini'},
+  {id:'m25',mes:'Maio',tipo:'despesa',descricao:'Almoço Felipe Tommy',subitem:'',valor:1271,dia:13,cat:'restaurante'},
+  {id:'m26',mes:'Maio',tipo:'despesa',descricao:'Seguidores Instagram',subitem:'Compra de Seguidores',valor:6122,dia:13,cat:'outros'},
+  {id:'m27',mes:'Maio',tipo:'despesa',descricao:'Oferta',subitem:'Oferta',valor:2000,dia:10,cat:'outros'},
+  {id:'m28',mes:'Maio',tipo:'despesa',descricao:'Empréstimo Passagem',subitem:'Empréstimo',valor:63872,dia:1,cat:'parcela'},
+  {id:'m29',mes:'Maio',tipo:'despesa',descricao:'Dízimo',subitem:'Dízimo',valor:30000,dia:10,cat:'outros'},
+  {id:'me1',mes:'Maio',tipo:'entrada',descricao:'Aluguel Casa da Frente (Brasil)',subitem:'Aluguel Casa da Frente',valor:50752,dia:1,cat:'income'},
+  {id:'me2',mes:'Maio',tipo:'entrada',descricao:'Aluguel Casa de Trás (Brasil)',subitem:'Aluguel Casa de Trás',valor:31720,dia:5,cat:'income'},
+  {id:'me3',mes:'Maio',tipo:'entrada',descricao:'Pagamento Braz',subitem:'',valor:50715,dia:27,cat:'income'},
+  {id:'me4',mes:'Maio',tipo:'entrada',descricao:'Pagamento Junior do Macre',subitem:'',valor:47580,dia:1,cat:'income'},
+  {id:'me5',mes:'Maio',tipo:'entrada',descricao:'Pagamento Imprensa',subitem:'',valor:31720,dia:9,cat:'income'},
+  {id:'me6',mes:'Maio',tipo:'entrada',descricao:'Devolução Formigão',subitem:'',valor:47580,dia:10,cat:'income'},
+  {id:'me7',mes:'Maio',tipo:'entrada',descricao:'Contribuição água',subitem:'',valor:1269,dia:8,cat:'income'},
+  {id:'me8',mes:'Maio',tipo:'entrada',descricao:'Pagamento Anderson Moratório',subitem:'',valor:63440,dia:15,cat:'income'},
+  // JUNHO
+  {id:'j1',mes:'Junho',tipo:'despesa',descricao:'JR Tokai (Trem)',subitem:'JR Tokai (Trem)',valor:660,dia:1,cat:'transporte'},
+  {id:'j2',mes:'Junho',tipo:'despesa',descricao:'7-Eleven',subitem:'7-Eleven',valor:127,dia:1,cat:'kombini'},
+  {id:'j3',mes:'Junho',tipo:'despesa',descricao:'7-Eleven',subitem:'7-Eleven',valor:2315,dia:1,cat:'kombini'},
+  {id:'j4',mes:'Junho',tipo:'despesa',descricao:'JR Tokai (Trem)',subitem:'JR Tokai (Trem)',valor:660,dia:1,cat:'transporte'},
+  {id:'j5',mes:'Junho',tipo:'despesa',descricao:'Daiso',subitem:'Daiso',valor:1100,dia:1,cat:'lojas'},
+  {id:'j6',mes:'Junho',tipo:'despesa',descricao:'Daiso',subitem:'Daiso',valor:6152,dia:2,cat:'lojas'},
+  {id:'j7',mes:'Junho',tipo:'despesa',descricao:'Daiso',subitem:'Daiso',valor:770,dia:2,cat:'lojas'},
+  {id:'j8',mes:'Junho',tipo:'despesa',descricao:'Daiso',subitem:'Daiso',valor:220,dia:1,cat:'lojas'},
+  {id:'j9',mes:'Junho',tipo:'despesa',descricao:'Kyorindo',subitem:'Kyorindo',valor:10384,dia:2,cat:'mercado'},
+  {id:'j10',mes:'Junho',tipo:'despesa',descricao:'Kyorindo',subitem:'Kyorindo',valor:1615,dia:4,cat:'mercado'},
+  {id:'j11',mes:'Junho',tipo:'despesa',descricao:'Valor',subitem:'Valor',valor:4214,dia:4,cat:'mercado'},
+  {id:'j12',mes:'Junho',tipo:'despesa',descricao:'FamilyMart',subitem:'FamilyMart',valor:519,dia:5,cat:'kombini'},
+  {id:'j13',mes:'Junho',tipo:'despesa',descricao:'Tarifas Bancárias',subitem:'Tarifas Bancárias',valor:220,dia:5,cat:'outros'},
+  {id:'j14',mes:'Junho',tipo:'despesa',descricao:'Kyorindo',subitem:'Kyorindo',valor:651,dia:6,cat:'mercado'},
+  {id:'j15',mes:'Junho',tipo:'despesa',descricao:'Ponto Brasil',subitem:'Ponto Brasil',valor:8383,dia:6,cat:'mercado'},
+  {id:'j16',mes:'Junho',tipo:'despesa',descricao:'Kyorindo',subitem:'Kyorindo',valor:4941,dia:6,cat:'mercado'},
+  {id:'j17',mes:'Junho',tipo:'despesa',descricao:'Dízimo',subitem:'Dízimo',valor:30000,dia:7,cat:'outros'},
+  {id:'j18',mes:'Junho',tipo:'despesa',descricao:'Instrução Trânsito',subitem:'Instrução Trânsito',valor:7000,dia:7,cat:'outros'},
+  {id:'j19',mes:'Junho',tipo:'despesa',descricao:'Gyomu Super',subitem:'Gyomu Super',valor:403,dia:7,cat:'mercado'},
+  {id:'j20',mes:'Junho',tipo:'despesa',descricao:'Kyorindo',subitem:'Kyorindo',valor:537,dia:8,cat:'mercado'},
+  {id:'j21',mes:'Junho',tipo:'despesa',descricao:'Kyorindo',subitem:'Kyorindo',valor:1117,dia:7,cat:'mercado'},
+  {id:'j22',mes:'Junho',tipo:'despesa',descricao:'Daiso',subitem:'Daiso',valor:1206,dia:8,cat:'lojas'},
+  {id:'j23',mes:'Junho',tipo:'despesa',descricao:'Valor',subitem:'Valor',valor:429,dia:8,cat:'mercado'},
+  {id:'j24',mes:'Junho',tipo:'despesa',descricao:'JR Tokai (Trem)',subitem:'JR Tokai (Trem)',valor:400,dia:7,cat:'transporte'},
+  {id:'j25',mes:'Junho',tipo:'despesa',descricao:'Gyomu Super',subitem:'Gyomu Super',valor:3815,dia:9,cat:'mercado'},
+  {id:'j26',mes:'Junho',tipo:'despesa',descricao:'Matsuya',subitem:'Matsuya',valor:3011,dia:10,cat:'restaurante'},
+  {id:'j27',mes:'Junho',tipo:'despesa',descricao:'Ponto Brasil',subitem:'Ponto Brasil',valor:6107,dia:12,cat:'mercado'},
+  {id:'j28',mes:'Junho',tipo:'despesa',descricao:'Daiso',subitem:'Daiso',valor:110,dia:12,cat:'lojas'},
+  {id:'j29',mes:'Junho',tipo:'despesa',descricao:'JR Tokai (Trem)',subitem:'JR Tokai (Trem)',valor:660,dia:12,cat:'transporte'},
+  {id:'j30',mes:'Junho',tipo:'despesa',descricao:'JR Tokai (Trem)',subitem:'JR Tokai (Trem)',valor:660,dia:11,cat:'transporte'},
+  {id:'j31',mes:'Junho',tipo:'despesa',descricao:'Instrução Trânsito',subitem:'Instrução Trânsito',valor:7000,dia:12,cat:'outros'},
+  {id:'j32',mes:'Junho',tipo:'despesa',descricao:'JR Tokai (Trem)',subitem:'JR Tokai (Trem)',valor:660,dia:11,cat:'transporte'},
+  {id:'j33',mes:'Junho',tipo:'despesa',descricao:'JR Tokai (Trem)',subitem:'JR Tokai (Trem)',valor:660,dia:12,cat:'transporte'},
+  {id:'j34',mes:'Junho',tipo:'despesa',descricao:'Gyomu Super',subitem:'Gyomu Super',valor:889,dia:10,cat:'mercado'},
+  {id:'j35',mes:'Junho',tipo:'despesa',descricao:'JR Tokai (Trem)',subitem:'JR Tokai (Trem)',valor:660,dia:12,cat:'transporte'},
+  {id:'j36',mes:'Junho',tipo:'despesa',descricao:'Lawson',subitem:'Lawson',valor:1091,dia:11,cat:'kombini'},
+  {id:'j37',mes:'Junho',tipo:'despesa',descricao:'JR Tokai (Trem)',subitem:'JR Tokai (Trem)',valor:700,dia:11,cat:'transporte'},
+  {id:'j38',mes:'Junho',tipo:'despesa',descricao:'7-Eleven',subitem:'7-Eleven',valor:1368,dia:12,cat:'kombini'},
+  {id:'j39',mes:'Junho',tipo:'despesa',descricao:'Taxi Escolar',subitem:'Taxi Escolar',valor:5000,dia:12,cat:'educacao'},
+  {id:'j40',mes:'Junho',tipo:'despesa',descricao:'Taxas Escolares',subitem:'Taxas Escolares',valor:8000,dia:12,cat:'educacao'},
+  {id:'j41',mes:'Junho',tipo:'despesa',descricao:'Lawson',subitem:'Lawson',valor:1189,dia:12,cat:'kombini'},
+  {id:'j42',mes:'Junho',tipo:'despesa',descricao:'Seria',subitem:'Seria',valor:880,dia:13,cat:'lojas'},
+  {id:'j43',mes:'Junho',tipo:'despesa',descricao:'Kyorindo',subitem:'Kyorindo',valor:603,dia:13,cat:'mercado'},
+  {id:'j44',mes:'Junho',tipo:'despesa',descricao:'7-Eleven',subitem:'7-Eleven',valor:1492,dia:13,cat:'kombini'},
+  {id:'j45',mes:'Junho',tipo:'despesa',descricao:'7-Eleven',subitem:'7-Eleven',valor:1440,dia:14,cat:'kombini'},
+  {id:'j46',mes:'Junho',tipo:'despesa',descricao:'Kyorindo',subitem:'Kyorindo',valor:3999,dia:15,cat:'mercado'},
 ];
 
-// ═══════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════
-let S = { lancamentos:[], categorias:[], brlRate:31.72, rateTS:'', taxas:{} };
-let SB = null; // supabase config {url, key}
-let useCloud = false;
-let curMonth = 'Maio';
-let curTipo = 'despesa';
-let charts = {};
-let pendingDel = null;
+// ── STATE ──────────────────────────────────────────────────
+let S={lancamentos:[],categorias:[],brlRate:31.72,rateTS:'',taxas:{}};
+let SB=null,useCloud=false,curMonth='Maio',curTipo='despesa';
+let charts={},pendingDel=null;
 
-// ═══════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════
-function uid(){ return 'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
-function fmt(n){ return Math.round(n).toLocaleString('ja-JP'); }
-function getCat(id){ return S.categorias.find(c=>c.id===id)||{name:id,color:'#94a3b8'}; }
-function getMonths(){ const ms=new Set(S.lancamentos.map(l=>l.mes)); return ALL_MONTHS.filter(m=>ms.has(m)); }
-function lancByMonth(m,tipo){ return S.lancamentos.filter(l=>l.mes===m&&l.tipo===tipo); }
-function totalD(m){ return lancByMonth(m,'despesa').reduce((s,x)=>s+x.valor,0); }
-function totalE(m){ return lancByMonth(m,'entrada').reduce((s,x)=>s+x.valor,0); }
-function getTaxa(m){ return S.taxas[m]||S.brlRate||31.72; }
+// ── UTILS ──────────────────────────────────────────────────
+function uid(){return 'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function fmt(n){return Math.round(n).toLocaleString('ja-JP');}
+function getCat(id){return S.categorias.find(c=>c.id===id)||{name:id,color:'#94a3b8',items:[]};}
+function getMonths(){const ms=new Set(S.lancamentos.map(l=>l.mes));return ALL_MONTHS.filter(m=>ms.has(m));}
+function lancBy(m,tipo){return S.lancamentos.filter(l=>l.mes===m&&l.tipo===tipo);}
+function totalD(m){return lancBy(m,'despesa').reduce((s,x)=>s+x.valor,0);}
+function totalE(m){return lancBy(m,'entrada').reduce((s,x)=>s+x.valor,0);}
+function getTaxa(m){return S.taxas[m]||S.brlRate||31.72;}
 
 function toast(msg,type){
   const el=document.getElementById('toast');
-  el.textContent=msg; el.className='toast show '+(type||'');
+  el.textContent=msg;el.className='toast show '+(type||'');
   setTimeout(()=>el.classList.remove('show'),2800);
 }
-
-function setSyncStatus(status, label){
-  const dot=document.getElementById('syncDot');
-  const lbl=document.getElementById('syncLabel');
-  if(dot){ dot.className='sync-dot '+status; }
-  if(lbl){ lbl.textContent=label; }
+function setSyncStatus(s,l){
+  const d=document.getElementById('syncDot'),lb=document.getElementById('syncLabel');
+  if(d)d.className='sync-dot '+s;if(lb)lb.textContent=l;
 }
 
-// ═══════════════════════════════════════════
-// LOCAL STORAGE
-// ═══════════════════════════════════════════
-function saveLocal(){
-  try{ localStorage.setItem(LS_KEY,JSON.stringify(S)); } catch(e){}
-}
-function loadLocal(){
-  try{
-    const r=localStorage.getItem(LS_KEY);
-    if(r){ S=JSON.parse(r); return true; }
-  } catch(e){}
-  return false;
-}
+// ── STORAGE ────────────────────────────────────────────────
+function saveLocal(){try{localStorage.setItem(LS_KEY,JSON.stringify(S));}catch(e){}}
+function loadLocal(){try{const r=localStorage.getItem(LS_KEY);if(r){S=JSON.parse(r);return true;}}catch(e){}return false;}
 
-// ═══════════════════════════════════════════
-// SUPABASE API
-// ═══════════════════════════════════════════
-async function sbFetch(path, method='GET', body=null){
-  const opts={method,headers:{'apikey':SB.key,'Authorization':'Bearer '+SB.key,'Content-Type':'application/json','Prefer':'return=minimal'}};
-  if(body) opts.body=JSON.stringify(body);
+// ── SUPABASE ───────────────────────────────────────────────
+async function sbFetch(path,method='GET',body=null){
+  const h={'apikey':SB.key,'Authorization':'Bearer '+SB.key,'Content-Type':'application/json','Prefer':'return=minimal'};
+  const opts={method,headers:h};
+  if(body)opts.body=JSON.stringify(body);
   const r=await fetch(SB.url+'/rest/v1/'+path,opts);
-  if(!r.ok){ const t=await r.text(); throw new Error(t); }
-  if(method==='GET') return r.json();
+  if(!r.ok){const t=await r.text();throw new Error(t);}
+  if(method==='GET')return r.json();
   return null;
 }
-
 async function cloudLoad(){
   setSyncStatus('syncing','Sincronizando...');
   try{
-    const [lancs,cats,cfgs]=await Promise.all([
+    const[lancs,cats,cfgs]=await Promise.all([
       sbFetch('lancamentos?select=*&order=created_at.asc'),
       sbFetch('categorias?select=*&order=ord.asc'),
       sbFetch('config?select=*')
     ]);
     S.lancamentos=lancs;
-    S.categorias=cats.length>0?cats:INITIAL_CATS;
-    const rateRow=cfgs.find(c=>c.key==='brlRate');
-    const rateTS=cfgs.find(c=>c.key==='rateTS');
-    const taxas=cfgs.find(c=>c.key==='taxas');
-    if(rateRow) S.brlRate=parseFloat(rateRow.value);
-    if(rateTS) S.rateTS=rateTS.value;
-    if(taxas) S.taxas=JSON.parse(taxas.value);
-    if(S.lancamentos.length===0) await cloudSeedInitial();
-    if(S.categorias===INITIAL_CATS) await cloudSeedCats();
+    S.categorias=cats.length>0?cats:JSON.parse(JSON.stringify(INITIAL_CATS));
+    // ensure items array exists
+    S.categorias.forEach(c=>{if(!c.items)c.items=[];});
+    const rr=cfgs.find(c=>c.key==='brlRate'),rt=cfgs.find(c=>c.key==='rateTS'),tx=cfgs.find(c=>c.key==='taxas');
+    if(rr)S.brlRate=parseFloat(rr.value);
+    if(rt)S.rateTS=rt.value;
+    if(tx)S.taxas=JSON.parse(tx.value);
+    if(S.lancamentos.length===0)await cloudSeed();
+    if(cats.length===0)await cloudSeedCats();
     saveLocal();
     setSyncStatus('online','Sincronizado com a nuvem');
     return true;
-  } catch(e){
-    setSyncStatus('error','Erro na sincronização');
-    return false;
-  }
+  }catch(e){setSyncStatus('error','Erro na sincronização');return false;}
 }
-
-async function cloudSeedInitial(){
-  const cats=INITIAL_CATS;
-  for(const c of cats){
-    try{ await sbFetch('categorias','POST',c); } catch(e){}
-  }
-  for(const l of INITIAL_LANC){
-    try{ await sbFetch('lancamentos','POST',l); } catch(e){}
-  }
-  S.lancamentos=[...INITIAL_LANC];
-  S.categorias=[...cats];
+async function cloudSeed(){
+  for(const c of INITIAL_CATS){try{await sbFetch('categorias','POST',c);}catch(e){}}
+  for(const l of INITIAL_LANC){try{await sbFetch('lancamentos','POST',l);}catch(e){}}
+  S.lancamentos=[...INITIAL_LANC];S.categorias=JSON.parse(JSON.stringify(INITIAL_CATS));
 }
-
 async function cloudSeedCats(){
-  for(const c of INITIAL_CATS){
-    try{ await sbFetch('categorias','POST',c); } catch(e){}
-  }
+  for(const c of INITIAL_CATS){try{await sbFetch('categorias','POST',c);}catch(e){}}
 }
-
-async function cloudInsertLanc(l){
-  await sbFetch('lancamentos','POST',l);
-}
-
-async function cloudDeleteLanc(id){
-  await sbFetch('lancamentos?id=eq.'+id,'DELETE');
-}
-
-async function cloudSetConfig(key,value){
-  // upsert via POST with on conflict
-  await fetch(SB.url+'/rest/v1/config',{
-    method:'POST',
+async function cloudInsert(l){await sbFetch('lancamentos','POST',l);}
+async function cloudDelete(id){await sbFetch('lancamentos?id=eq.'+id,'DELETE');}
+async function cloudSetCfg(key,value){
+  await fetch(SB.url+'/rest/v1/config',{method:'POST',
     headers:{'apikey':SB.key,'Authorization':'Bearer '+SB.key,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},
-    body:JSON.stringify({key,value:String(value)})
-  });
+    body:JSON.stringify({key,value:String(value)})});
 }
-
-// ═══════════════════════════════════════════
-// SETUP
-// ═══════════════════════════════════════════
-function openSetup(){
-  document.getElementById('setupScreen').style.display='flex';
+async function cloudUpsertCat(cat){
+  await fetch(SB.url+'/rest/v1/categorias',{method:'POST',
+    headers:{'apikey':SB.key,'Authorization':'Bearer '+SB.key,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},
+    body:JSON.stringify(cat)});
 }
+async function cloudDeleteCat(id){await sbFetch('categorias?id=eq.'+id,'DELETE');}
 
+// ── SETUP ──────────────────────────────────────────────────
+function openSetup(){document.getElementById('setupScreen').style.display='flex';}
 async function connectSupabase(){
   const url=document.getElementById('sbUrl').value.trim().replace(/\/$/,'');
   const key=document.getElementById('sbKey').value.trim();
-  if(!url||!key){ document.getElementById('setupMsg').textContent='Preencha URL e Key.'; return; }
+  if(!url||!key){document.getElementById('setupMsg').textContent='Preencha URL e chave.';return;}
   document.getElementById('setupMsg').textContent='Conectando...';
-  SB={url,key}; useCloud=true;
-  localStorage.setItem(LS_SB,JSON.stringify(SB));
+  SB={url,key};useCloud=true;localStorage.setItem(LS_SB,JSON.stringify(SB));
   const ok=await cloudLoad();
-  if(ok){
-    document.getElementById('setupScreen').style.display='none';
-    toast('Conectado ao Supabase ✓','ok');
-    init();
-  } else {
-    document.getElementById('setupMsg').textContent='Erro ao conectar. Verifique URL e Key, e execute o SQL no Supabase.';
-    SB=null; useCloud=false;
-  }
+  if(ok){document.getElementById('setupScreen').style.display='none';toast('Conectado ao Supabase ✓','ok');init();}
+  else{document.getElementById('setupMsg').textContent='Erro. Verifique URL e chave.';SB=null;useCloud=false;}
 }
-
 function useLocal(){
-  useCloud=false; SB=null;
-  localStorage.removeItem(LS_SB);
-  if(!loadLocal()){
-    S.lancamentos=[...INITIAL_LANC];
-    S.categorias=[...INITIAL_CATS];
-    saveLocal();
-  }
+  useCloud=false;SB=null;localStorage.removeItem(LS_SB);
+  if(!loadLocal()){S.lancamentos=JSON.parse(JSON.stringify(INITIAL_LANC));S.categorias=JSON.parse(JSON.stringify(INITIAL_CATS));saveLocal();}
   document.getElementById('setupScreen').style.display='none';
-  setSyncStatus('','Modo local (sem sincronização)');
-  toast('Usando armazenamento local','ok');
-  init();
+  setSyncStatus('','Modo local');toast('Modo local ativado','ok');init();
 }
-
-// ═══════════════════════════════════════════
-// BOOT
-// ═══════════════════════════════════════════
 async function boot(){
-  document.getElementById('sqlBlock').textContent=SQL_SETUP;
   const sbRaw=localStorage.getItem(LS_SB);
-  if(sbRaw){
-    SB=JSON.parse(sbRaw); useCloud=true;
-    const ok=await cloudLoad();
-    if(!ok){ loadLocal(); setSyncStatus('error','Offline — usando dados locais'); }
-    init();
-  } else if(loadLocal()){
-    setSyncStatus('','Modo local');
-    init();
-  } else {
-    document.getElementById('setupScreen').style.display='flex';
-  }
+  if(sbRaw){SB=JSON.parse(sbRaw);useCloud=true;const ok=await cloudLoad();if(!ok){loadLocal();setSyncStatus('error','Offline — dados locais');}init();}
+  else if(loadLocal()){setSyncStatus('','Modo local');init();}
+  else{document.getElementById('setupScreen').style.display='flex';}
 }
+function init(){goPage('dashboard');}
 
-function init(){ goPage('dashboard'); }
-
-// ═══════════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════════
+// ── NAV ────────────────────────────────────────────────────
 function goPage(p){
   PAGES.forEach((pg,i)=>{
     document.getElementById('page-'+pg).classList.toggle('active',pg===p);
     document.querySelectorAll('.nav-btn')[i].classList.toggle('active',pg===p);
   });
-  if(p==='dashboard') renderDash();
-  if(p==='lancamentos') renderLanc();
-  if(p==='categorias') renderCats();
-  if(p==='conversor') renderConv();
-  if(p==='config') renderCfg();
+  if(p==='dashboard')renderDash();
+  if(p==='lancamentos')renderLanc();
+  if(p==='categorias')renderCats();
+  if(p==='conversor')renderConv();
+  if(p==='config')renderCfg();
 }
 
-// ═══════════════════════════════════════════
-// MONTH PILLS
-// ═══════════════════════════════════════════
+// ── PILLS ──────────────────────────────────────────────────
 function buildPills(id,cb){
-  const el=document.getElementById(id); el.innerHTML='';
+  const el=document.getElementById(id);el.innerHTML='';
   getMonths().forEach(m=>{
     const b=document.createElement('button');
     b.className='mpill'+(m===curMonth?' active':'');
-    b.textContent=m; b.onclick=()=>{curMonth=m;cb();};
-    el.appendChild(b);
+    b.textContent=m;b.onclick=()=>{curMonth=m;cb();};el.appendChild(b);
   });
   const ba=document.createElement('button');
   ba.className='mpill anual'+(curMonth==='Anual'?' active':'');
-  ba.textContent='Ano todo'; ba.onclick=()=>{curMonth='Anual';cb();};
-  el.appendChild(ba);
+  ba.textContent='Ano todo';ba.onclick=()=>{curMonth='Anual';cb();};el.appendChild(ba);
 }
 
-// ═══════════════════════════════════════════
-// DASHBOARD
-// ═══════════════════════════════════════════
+// ── DASHBOARD ──────────────────────────────────────────────
 function renderDash(){
   buildPills('msel-d',renderDash);
   const months=curMonth==='Anual'?getMonths():[curMonth];
@@ -678,93 +600,102 @@ function renderDash(){
     <div class="metric pos"><div class="lb">Entradas</div><div class="vl">¥${fmt(te)}</div><div class="sb">${curMonth}</div></div>
     <div class="metric ${sl>=0?'pos':'neg'}"><div class="lb">Saldo</div><div class="vl">¥${fmt(sl)}</div><div class="sb">${sl>=0?'Positivo':'Negativo'}</div></div>
     <div class="metric acc"><div class="lb">Meses</div><div class="vl">${getMonths().length}</div><div class="sb">registrados</div></div>`;
-  renderBarChart(months); renderPieChart(months); renderLineChart();
+  renderBarChart(months);renderPieChart(months);renderLineChart();
   const all=[];
-  months.forEach(m=>lancByMonth(m,'despesa').forEach(x=>all.push({...x,month:m})));
+  months.forEach(m=>lancBy(m,'despesa').forEach(x=>all.push({...x,month:m})));
   all.sort((a,b)=>b.valor-a.valor);
   document.getElementById('topList').innerHTML=all.slice(0,8).map(x=>`
     <div class="entry-item">
       <div class="ei-cat" style="background:${getCat(x.cat).color}"></div>
-      <div class="ei-info"><div class="ei-desc">${x.descricao}</div><div class="ei-meta">${getCat(x.cat).name} · ${x.month}</div></div>
+      <div class="ei-info">
+        <div class="ei-desc">${x.descricao||''}</div>
+        ${x.subitem?`<div class="ei-sub">${x.subitem}</div>`:''}
+        <div class="ei-meta">${getCat(x.cat).name} · ${x.month}</div>
+      </div>
       <div class="ei-amount" style="color:var(--red)">¥${fmt(x.valor)}</div>
     </div>`).join('')||'<div class="empty">Nenhuma despesa registrada</div>';
 }
-
 function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
-
 function renderBarChart(months){
   dc('bar');
   const labels=months.length===1?months:[...months,'Total'];
-  const dData=months.map(m=>totalD(m));
-  const eData=months.map(m=>totalE(m));
-  if(months.length>1){dData.push(dData.reduce((a,b)=>a+b,0));eData.push(eData.reduce((a,b)=>a+b,0));}
+  const dD=months.map(m=>totalD(m)),eD=months.map(m=>totalE(m));
+  if(months.length>1){dD.push(dD.reduce((a,b)=>a+b,0));eD.push(eD.reduce((a,b)=>a+b,0));}
   charts['bar']=new Chart(document.getElementById('barChart').getContext('2d'),{
-    type:'bar',data:{labels,datasets:[
-      {label:'Saídas',data:dData,backgroundColor:'#f87171',borderRadius:4},
-      {label:'Entradas',data:eData,backgroundColor:'#34d399',borderRadius:4}
-    ]},
+    type:'bar',data:{labels,datasets:[{label:'Saídas',data:dD,backgroundColor:'#f87171',borderRadius:4},{label:'Entradas',data:eD,backgroundColor:'#34d399',borderRadius:4}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{y:{ticks:{callback:v=>'¥'+fmt(v),color:'#64748b',font:{size:9}},grid:{color:'rgba(148,163,184,0.07)'}},
-              x:{grid:{display:false},ticks:{color:'#64748b',font:{size:9}}}}}
+      scales:{y:{ticks:{callback:v=>'¥'+fmt(v),color:'#64748b',font:{size:9}},grid:{color:'rgba(148,163,184,0.07)'}},x:{grid:{display:false},ticks:{color:'#64748b',font:{size:9}}}}}
   });
 }
 function renderPieChart(months){
   dc('pie');
   const cm={};
-  months.forEach(m=>lancByMonth(m,'despesa').forEach(x=>{cm[x.cat]=(cm[x.cat]||0)+x.valor;}));
+  months.forEach(m=>lancBy(m,'despesa').forEach(x=>{cm[x.cat]=(cm[x.cat]||0)+x.valor;}));
   const sorted=Object.entries(cm).sort((a,b)=>b[1]-a[1]);
   document.getElementById('pieLeg').innerHTML=sorted.map(([id,v])=>
     `<span><span class="pie-dot" style="background:${getCat(id).color}"></span>${getCat(id).name} ¥${fmt(v)}</span>`).join('');
   charts['pie']=new Chart(document.getElementById('pieChart').getContext('2d'),{
     type:'doughnut',
-    data:{labels:sorted.map(([id])=>getCat(id).name),datasets:[{
-      data:sorted.map(([,v])=>v),backgroundColor:sorted.map(([id])=>getCat(id).color),
-      borderWidth:2,borderColor:'#1e293b'}]},
+    data:{labels:sorted.map(([id])=>getCat(id).name),datasets:[{data:sorted.map(([,v])=>v),backgroundColor:sorted.map(([id])=>getCat(id).color),borderWidth:2,borderColor:'#1e293b'}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'60%'}
   });
 }
 function renderLineChart(){
   dc('line');
-  const months=getMonths(); let acc=0;
+  const months=getMonths();let acc=0;
   const saldos=months.map(m=>{acc+=totalE(m)-totalD(m);return acc;});
   charts['line']=new Chart(document.getElementById('lineChart').getContext('2d'),{
     type:'line',
-    data:{labels:months,datasets:[{label:'Saldo',data:saldos,
-      borderColor:'#38bdf8',backgroundColor:'rgba(56,189,248,0.07)',
-      borderWidth:2,pointRadius:4,fill:true,tension:0.35}]},
+    data:{labels:months,datasets:[{label:'Saldo',data:saldos,borderColor:'#38bdf8',backgroundColor:'rgba(56,189,248,0.07)',borderWidth:2,pointRadius:4,fill:true,tension:0.35}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{y:{ticks:{callback:v=>'¥'+fmt(v),color:'#64748b',font:{size:9}},grid:{color:'rgba(148,163,184,0.07)'}},
-              x:{grid:{display:false},ticks:{color:'#64748b',font:{size:9}}}}}
+      scales:{y:{ticks:{callback:v=>'¥'+fmt(v),color:'#64748b',font:{size:9}},grid:{color:'rgba(148,163,184,0.07)'}},x:{grid:{display:false},ticks:{color:'#64748b',font:{size:9}}}}}
   });
 }
 
-// ═══════════════════════════════════════════
-// LANÇAMENTOS
-// ═══════════════════════════════════════════
+// ── LANÇAMENTOS ────────────────────────────────────────────
 function renderLanc(){
   buildPills('msel-l',renderLanc);
   document.getElementById('fMes').innerHTML=ALL_MONTHS.map(m=>`<option value="${m}"${m===curMonth&&curMonth!=='Anual'?' selected':''}>${m}</option>`).join('');
   document.getElementById('fCat').innerHTML=S.categorias.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  onCatChange();
   const m=curMonth==='Anual'?getMonths().slice(-1)[0]:curMonth;
   document.getElementById('lblMesD').textContent=m||'';
   document.getElementById('lblMesE').textContent=m||'';
-  if(!m){document.getElementById('listD').innerHTML='<div class="empty">Nenhum mês com dados</div>';document.getElementById('listE').innerHTML='';return;}
-  const deps=lancByMonth(m,'despesa');
-  const ents=lancByMonth(m,'entrada');
+  if(!m){document.getElementById('listD').innerHTML='<div class="empty">Nenhum mês</div>';document.getElementById('listE').innerHTML='';return;}
+  const deps=lancBy(m,'despesa'),ents=lancBy(m,'entrada');
   document.getElementById('listD').innerHTML=deps.length?deps.map(x=>entryHTML(x,'red')).join(''):'<div class="empty">Nenhuma despesa em '+m+'</div>';
   document.getElementById('listE').innerHTML=ents.length?ents.map(x=>entryHTML(x,'green')).join(''):'<div class="empty">Nenhuma entrada em '+m+'</div>';
 }
 
-function entryHTML(x,color){ const xdesc=x.descricao||x.desc||'';
+function entryHTML(x,color){
+  const d=x.descricao||'';const sub=x.subitem||'';
   return `<div class="entry-item" id="ei-${x.id}">
     <div class="ei-cat" style="background:${getCat(x.cat).color}"></div>
     <div class="ei-info">
-      <div class="ei-desc">${x.descricao}</div>
+      <div class="ei-desc">${d}</div>
+      ${sub?`<div class="ei-sub">${sub}</div>`:''}
       <div class="ei-meta">${getCat(x.cat).name}${x.dia?' · dia '+x.dia:''}</div>
     </div>
     <div class="ei-amount" style="color:var(--${color})">¥${fmt(x.valor)}</div>
-    <button class="ei-del" onclick="askDelete('${x.id}')" title="Apagar">×</button>
+    <button class="ei-del" onclick="askDelete('${x.id}')">×</button>
   </div>`;
+}
+
+function onCatChange(){
+  const catId=document.getElementById('fCat').value;
+  const cat=getCat(catId);
+  const items=cat.items||[];
+  const sel=document.getElementById('fSubitem');
+  if(items.length>0){
+    sel.style.display='block';
+    sel.innerHTML='<option value="">— Selecione o item —</option>'+items.map(i=>`<option value="${i}">${i}</option>`).join('');
+    sel.onchange=()=>{
+      const v=sel.value;
+      if(v)document.getElementById('fDesc').value=v;
+    };
+  } else {
+    sel.style.display='none';
+  }
 }
 
 function setTipo(t){
@@ -776,125 +707,167 @@ function setTipo(t){
 
 async function addEntry(){
   const desc=document.getElementById('fDesc').value.trim();
+  const subitem=document.getElementById('fSubitem').value||'';
   const valor=parseFloat(document.getElementById('fValor').value)||0;
   const dia=parseInt(document.getElementById('fDia').value)||0;
   const cat=document.getElementById('fCat').value;
   const mes=document.getElementById('fMes').value;
   if(!desc||!valor){toast('Preencha descrição e valor!','err');return;}
-  const entry={id:uid(),mes,tipo:curTipo,descricao:desc,valor,dia,cat};
-  S.lancamentos.push(entry);
-  saveLocal();
-  document.getElementById('fDesc').value='';
-  document.getElementById('fValor').value='';
-  document.getElementById('fDia').value='';
-  renderLanc();
-  toast(curTipo==='despesa'?'Despesa registrada ✓':'Entrada registrada ✓','ok');
+  const entry={id:uid(),mes,tipo:curTipo,descricao:desc,subitem,valor,dia,cat};
+  S.lancamentos.push(entry);saveLocal();
+  document.getElementById('fDesc').value='';document.getElementById('fValor').value='';document.getElementById('fDia').value='';
+  document.getElementById('fSubitem').value='';
+  renderLanc();toast(curTipo==='despesa'?'Despesa registrada ✓':'Entrada registrada ✓','ok');
   if(useCloud&&SB){
     setSyncStatus('syncing','Salvando...');
-    try{ await cloudInsertLanc(entry); setSyncStatus('online','Salvo na nuvem'); }
-    catch(e){ setSyncStatus('error','Erro ao salvar na nuvem'); }
+    try{await cloudInsert(entry);setSyncStatus('online','Salvo na nuvem');}
+    catch(e){setSyncStatus('error','Erro ao salvar na nuvem');}
   }
 }
 
-// ─── DELETE FLOW ────────────────────────────
 function askDelete(id){
-  const x=S.lancamentos.find(l=>l.id===id);
-  if(!x) return;
+  const x=S.lancamentos.find(l=>l.id===id);if(!x)return;
   pendingDel=id;
-  document.getElementById('delModalDesc').textContent=x.descricao+' · '+x.mes+(x.dia?' dia '+x.dia:'');
-  document.getElementById('delModalVal').textContent=(x.tipo==='despesa'?'−':'+')+' ¥'+fmt(x.valor);
+  document.getElementById('delModalDesc').textContent=(x.descricao||'')+(x.subitem?' — '+x.subitem:'')+' · '+x.mes+(x.dia?' dia '+x.dia:'');
+  document.getElementById('delModalVal').textContent=(x.tipo==='despesa'?'− ':'+ ')+'¥'+fmt(x.valor);
   document.getElementById('delModalVal').style.color=x.tipo==='despesa'?'var(--red)':'var(--green)';
   document.getElementById('delModal').style.display='flex';
 }
-
-function closeDelModal(){
-  document.getElementById('delModal').style.display='none';
-  pendingDel=null;
-}
-
+function closeDelModal(){document.getElementById('delModal').style.display='none';pendingDel=null;}
 async function confirmDelete(){
-  if(!pendingDel) return;
-  const id=pendingDel;
-  closeDelModal();
-  const el=document.getElementById('ei-'+id);
-  if(el) el.classList.add('deleting');
-  S.lancamentos=S.lancamentos.filter(l=>l.id!==id);
-  saveLocal();
-  renderLanc();
+  if(!pendingDel)return;
+  const id=pendingDel;closeDelModal();
+  const el=document.getElementById('ei-'+id);if(el)el.classList.add('deleting');
+  S.lancamentos=S.lancamentos.filter(l=>l.id!==id);saveLocal();renderLanc();
   toast('Lançamento apagado','ok');
   if(useCloud&&SB){
-    setSyncStatus('syncing','Apagando da nuvem...');
-    try{ await cloudDeleteLanc(id); setSyncStatus('online','Sincronizado'); }
-    catch(e){ setSyncStatus('error','Erro ao apagar da nuvem'); }
+    setSyncStatus('syncing','Apagando...');
+    try{await cloudDelete(id);setSyncStatus('online','Sincronizado');}
+    catch(e){setSyncStatus('error','Erro ao apagar da nuvem');}
   }
 }
 
-// ═══════════════════════════════════════════
-// CATEGORIAS
-// ═══════════════════════════════════════════
+// ── CATEGORIAS ─────────────────────────────────────────────
 function renderCats(){
-  document.getElementById('catGrid').innerHTML=S.categorias.map((c,i)=>`
-    <div class="cat-row">
-      <div class="cat-dot" style="background:${c.color}"></div>
-      <span style="flex:1;font-size:13px;font-weight:500">${c.name}</span>
-      <button class="cat-del" onclick="delCat(${i})">×</button>
-    </div>`).join('');
+  const el=document.getElementById('catGrid');el.innerHTML='';
+  S.categorias.forEach((c,i)=>{
+    const items=c.items||[];
+    const row=document.createElement('div');
+    row.innerHTML=`
+      <div class="cat-row" id="catrow-${c.id}" onclick="toggleCat('${c.id}')">
+        <div class="cat-dot" style="background:${c.color}"></div>
+        <span style="flex:1;font-size:13px;font-weight:500">${c.name}</span>
+        <span style="font-size:11px;color:var(--muted);margin-right:4px">${items.length} itens</span>
+        <span class="cat-chevron" id="chev-${c.id}">›</span>
+        <button onclick="event.stopPropagation();delCat(${i})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;padding:4px;border-radius:6px;margin-left:4px">×</button>
+      </div>
+      <div class="cat-items-panel" id="panel-${c.id}">
+        <div id="tags-${c.id}">${items.map(it=>`<span class="item-tag" onclick="delItem('${c.id}','${it}')">${it}<span class="del-item">×</span></span>`).join('')}</div>
+        <div class="add-item-row">
+          <input id="newitem-${c.id}" placeholder="Novo item..." onkeydown="if(event.key==='Enter')addItem('${c.id}')" />
+          <button class="add-item-btn" onclick="addItem('${c.id}')">+ Add</button>
+        </div>
+      </div>`;
+    el.appendChild(row);
+  });
+  // Annual table
   const months=getMonths();
   document.querySelector('#anualTbl thead').innerHTML=`<tr><th>Categoria</th>${months.map(m=>`<th class="r">${m.slice(0,3)}</th>`).join('')}<th class="r">Total</th></tr>`;
   const cm={};
-  months.forEach(m=>lancByMonth(m,'despesa').forEach(x=>{if(!cm[x.cat])cm[x.cat]={};cm[x.cat][m]=(cm[x.cat][m]||0)+x.valor;}));
+  months.forEach(m=>lancBy(m,'despesa').forEach(x=>{if(!cm[x.cat])cm[x.cat]={};cm[x.cat][m]=(cm[x.cat][m]||0)+x.valor;}));
   let grand=0;
   const rows=S.categorias.map(c=>{
     const vals=months.map(m=>cm[c.id]?cm[c.id][m]||0:0);
-    const tot=vals.reduce((a,b)=>a+b,0); grand+=tot;
+    const tot=vals.reduce((a,b)=>a+b,0);grand+=tot;
     return `<tr><td><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:${c.color};margin-right:5px;vertical-align:middle"></span>${c.name}</td>${vals.map(v=>`<td class="r" style="color:var(--muted)">${v?'¥'+fmt(v):'—'}</td>`).join('')}<td class="r" style="font-weight:600">¥${fmt(tot)}</td></tr>`;
   });
   rows.push(`<tr><td style="font-weight:600">Total</td>${months.map(m=>`<td class="r" style="font-weight:600">¥${fmt(totalD(m))}</td>`).join('')}<td class="r" style="font-weight:600">¥${fmt(grand)}</td></tr>`);
   document.querySelector('#anualTbl tbody').innerHTML=rows.join('');
 }
 
+function toggleCat(id){
+  const panel=document.getElementById('panel-'+id);
+  const chev=document.getElementById('chev-'+id);
+  const row=document.getElementById('catrow-'+id);
+  const open=panel.classList.toggle('open');
+  chev.classList.toggle('open',open);
+  row.classList.toggle('expanded',open);
+}
+
 function addCat(){
   const name=document.getElementById('nCatNome').value.trim();
   const color=document.getElementById('nCatCor').value;
-  if(!name) return;
-  S.categorias.push({id:uid(),name,color,ord:S.categorias.length});
-  document.getElementById('nCatNome').value='';
-  saveLocal(); renderCats();
+  if(!name)return;
+  const cat={id:uid(),name,color,ord:S.categorias.length,items:[]};
+  S.categorias.push(cat);document.getElementById('nCatNome').value='';
+  saveLocal();renderCats();
+  if(useCloud&&SB)cloudUpsertCat(cat).catch(()=>{});
 }
 
-function delCat(i){ S.categorias.splice(i,1); saveLocal(); renderCats(); }
+function delCat(i){
+  const cat=S.categorias[i];
+  S.categorias.splice(i,1);saveLocal();renderCats();
+  if(useCloud&&SB)cloudDeleteCat(cat.id).catch(()=>{});
+}
 
-// ═══════════════════════════════════════════
-// CONVERSOR
-// ═══════════════════════════════════════════
+function addItem(catId){
+  const inp=document.getElementById('newitem-'+catId);
+  const val=inp.value.trim();if(!val)return;
+  const cat=S.categorias.find(c=>c.id===catId);if(!cat)return;
+  if(!cat.items)cat.items=[];
+  if(!cat.items.includes(val)){
+    cat.items.push(val);inp.value='';saveLocal();
+    const tags=document.getElementById('tags-'+catId);
+    const span=document.createElement('span');
+    span.className='item-tag';span.onclick=()=>delItem(catId,val);
+    span.innerHTML=`${val}<span class="del-item">×</span>`;
+    tags.appendChild(span);
+    if(useCloud&&SB)cloudUpsertCat(cat).catch(()=>{});
+    toast(val+' adicionado ✓','ok');
+  }
+}
+
+function delItem(catId,item){
+  const cat=S.categorias.find(c=>c.id===catId);if(!cat)return;
+  cat.items=cat.items.filter(i=>i!==item);saveLocal();renderCats();
+  if(useCloud&&SB)cloudUpsertCat(cat).catch(()=>{});
+}
+
+// ── CONVERSOR ──────────────────────────────────────────────
 function renderConv(){
   document.getElementById('rateDisplay').textContent=`¥ ${S.brlRate.toFixed(4)} / R$ 1,00`;
   document.getElementById('rateTS').textContent=S.rateTS?'Atualizado em '+S.rateTS:'';
   document.getElementById('rateHistBody').innerHTML=getMonths().map(m=>{
-    const te=totalE(m); const tx=getTaxa(m);
+    const te=totalE(m),tx=getTaxa(m);
     return `<tr><td>${m}</td><td class="r">${tx.toFixed(2)}</td><td class="r" style="color:var(--green)">${te?'¥'+fmt(te):'—'}</td></tr>`;
   }).join('');
 }
 
 async function fetchRate(){
   document.getElementById('rateDisplay').textContent='Buscando...';
+  // Use free public API - no CORS issues
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:150,
-        messages:[{role:'user',content:'Current BRL to JPY exchange rate? Reply ONLY valid JSON: {"rate":NUMBER} where NUMBER is JPY per 1 BRL.'}]})
-    });
+    const r=await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/brl.json');
     const d=await r.json();
-    const txt=d.content.map(x=>x.text||'').join('').replace(/```json|```/g,'').trim();
-    S.brlRate=JSON.parse(txt).rate;
-    S.rateTS=new Date().toLocaleDateString('pt-BR');
+    const rate=d.brl.jpy;
+    if(!rate)throw new Error('no rate');
+    S.brlRate=rate;S.rateTS=new Date().toLocaleDateString('pt-BR');
     saveLocal();
-    if(useCloud&&SB){ await cloudSetConfig('brlRate',S.brlRate); await cloudSetConfig('rateTS',S.rateTS); }
-    renderConv();
-    toast('¥'+S.brlRate.toFixed(4)+'/R$ — Atualizado!','ok');
-  } catch(e){
-    document.getElementById('rateDisplay').textContent=`¥ ${S.brlRate.toFixed(4)} / R$ 1,00`;
-    toast('Erro ao buscar cotação','err');
+    if(useCloud&&SB){await cloudSetCfg('brlRate',S.brlRate);await cloudSetCfg('rateTS',S.rateTS);}
+    renderConv();toast('¥'+S.brlRate.toFixed(4)+'/R$ — Atualizado!','ok');
+  }catch(e){
+    // fallback
+    try{
+      const r2=await fetch('https://open.er-api.com/v6/latest/BRL');
+      const d2=await r2.json();
+      const rate2=d2.rates&&d2.rates.JPY;
+      if(!rate2)throw new Error('no rate');
+      S.brlRate=rate2;S.rateTS=new Date().toLocaleDateString('pt-BR');
+      saveLocal();renderConv();toast('¥'+S.brlRate.toFixed(4)+'/R$ — Atualizado!','ok');
+    }catch(e2){
+      document.getElementById('rateDisplay').textContent=`¥ ${S.brlRate.toFixed(4)} / R$ 1,00`;
+      toast('Usando cotação salva: ¥'+S.brlRate.toFixed(2),'err');
+    }
   }
 }
 
@@ -910,39 +883,25 @@ function cvYEN(){
   document.getElementById('outBRLsm').textContent=v?`¥ ${v.toLocaleString('ja-JP')} ÷ ${S.brlRate.toFixed(4)}`:'';
 }
 
-// ═══════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════
+// ── CONFIG ─────────────────────────────────────────────────
 function renderCfg(){
-  const connected=useCloud&&SB;
-  document.getElementById('connInfo').innerHTML=connected
-    ?`<strong>☁ Supabase conectado</strong><br>${SB.url}<br><span style="color:var(--green)">Dados sincronizam entre todos os dispositivos em tempo real.</span>`
-    :`<strong>💾 Modo local</strong><br>Dados salvos apenas neste navegador. Para sincronizar com o iPhone, conecte ao Supabase.`;
-  const months=getMonths();
+  document.getElementById('connInfo').innerHTML=useCloud&&SB
+    ?`<strong>☁ Supabase conectado</strong><br>${SB.url}<br><span style="color:var(--green)">Sincronizado entre todos os dispositivos.</span>`
+    :`<strong>💾 Modo local</strong><br>Dados salvos apenas neste navegador.`;
   let html='';
-  months.forEach(m=>{
-    const nd=lancByMonth(m,'despesa').length, ne=lancByMonth(m,'entrada').length;
-    const sl=totalE(m)-totalD(m);
-    html+=`<p style="margin-bottom:5px">• <strong style="color:var(--text)">${m}</strong>: ${nd} despesas · ${ne} entradas · saldo <span style="color:${sl>=0?'var(--green)':'var(--red)'}">¥${fmt(sl)}</span></p>`;
+  getMonths().forEach(m=>{
+    const nd=lancBy(m,'despesa').length,ne=lancBy(m,'entrada').length,sl=totalE(m)-totalD(m);
+    html+=`<p style="margin-bottom:5px">• <strong style="color:var(--text)">${m}</strong>: ${nd} despesas · ${ne} entradas · <span style="color:${sl>=0?'var(--green)':'var(--red)'}">¥${fmt(sl)}</span></p>`;
   });
   document.getElementById('dataStatus').innerHTML=html||'<span>Nenhum dado ainda.</span>';
 }
-
 async function resetData(){
-  if(!confirm('Apagar tudo e restaurar Abril+Maio originais?')) return;
-  S={lancamentos:[...INITIAL_LANC],categorias:[...INITIAL_CATS],brlRate:31.72,rateTS:'',taxas:{}};
-  saveLocal(); renderCfg();
-  toast('Dados resetados ✓','ok');
+  if(!confirm('Apagar tudo e restaurar dados iniciais?'))return;
+  S={lancamentos:JSON.parse(JSON.stringify(INITIAL_LANC)),categorias:JSON.parse(JSON.stringify(INITIAL_CATS)),brlRate:31.72,rateTS:'',taxas:{}};
+  saveLocal();renderCfg();toast('Dados resetados ✓','ok');
 }
 
-// Close modal clicking overlay
-document.getElementById('delModal').addEventListener('click',function(e){
-  if(e.target===this) closeDelModal();
-});
-
-// ═══════════════════════════════════════════
-// START
-// ═══════════════════════════════════════════
+document.getElementById('delModal').addEventListener('click',function(e){if(e.target===this)closeDelModal();});
 boot();
 </script>
 </body>
