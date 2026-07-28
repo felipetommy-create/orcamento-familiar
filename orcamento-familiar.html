@@ -152,6 +152,45 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
 .btn-danger{background:none;border:1px solid var(--red);border-radius:var(--radius-sm);padding:9px 14px;font-size:13px;color:var(--red);cursor:pointer;font-weight:600}
 .info-card{background:var(--accent-dim);border:.5px solid rgba(56,189,248,.2);border-radius:var(--radius);padding:13px;margin-bottom:11px;font-size:12px;color:var(--muted);line-height:1.7}
 .info-card strong{color:var(--accent)}
+/* TETOS */
+.teto-row{padding:9px 0;border-bottom:.5px solid var(--border)}
+.teto-row:last-child{border-bottom:none}
+.teto-top{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.teto-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.teto-name{flex:1;font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.teto-val{font-size:11.5px;font-variant-numeric:tabular-nums;color:var(--muted);flex-shrink:0}
+.teto-val b{font-weight:700}
+.teto-bar{height:6px;border-radius:3px;background:var(--surface2);overflow:hidden}
+.teto-fill{height:100%;border-radius:3px;transition:width .4s ease}
+.teto-pct{font-size:10px;margin-top:3px;display:flex;justify-content:space-between;color:var(--muted)}
+.tt-ok{color:var(--green)}.tt-warn{color:#fbbf24}.tt-over{color:var(--red)}
+.teto-edit{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:.5px solid var(--border)}
+.teto-edit:last-child{border-bottom:none}
+.teto-edit .tn{flex:1;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.teto-edit input{width:96px;background:var(--surface2);border:.5px solid var(--border2);border-radius:7px;padding:8px 9px;font-size:13px;color:var(--text);text-align:right;font-variant-numeric:tabular-nums;-webkit-appearance:none;font-family:inherit}
+.teto-edit input:focus{outline:none;border-color:var(--accent)}
+/* IGREJA */
+.ig-card{background:linear-gradient(135deg,rgba(167,139,250,.10),rgba(56,189,248,.06));border:.5px solid rgba(167,139,250,.28);border-radius:var(--radius);padding:14px;margin-bottom:11px}
+.ig-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.ig-title{font-size:10px;color:#c4b5fd;text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.ig-pct{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.ig-pct input{width:52px;background:var(--surface2);border:.5px solid var(--border2);border-radius:6px;padding:5px 7px;font-size:12px;color:var(--text);text-align:right;-webkit-appearance:none;font-family:inherit}
+.ig-pct input:focus{outline:none;border-color:#a78bfa}
+.ig-main{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:9px}
+.ig-lb{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.ig-big{font-size:21px;font-weight:700;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.ig-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.ig-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:11px;padding-top:11px;border-top:.5px solid var(--border2)}
+.ig-cell{text-align:center}
+.ig-cell .v{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+.ig-cell .k{font-size:9.5px;color:var(--muted);margin-top:2px}
+/* PENDENCIAS */
+.pend-card{background:rgba(251,191,36,.08);border:.5px solid rgba(251,191,36,.3);border-radius:var(--radius);padding:12px 13px;margin-bottom:11px;font-size:12px;color:#fde68a;line-height:1.6;display:none}
+.pend-card.show{display:block}
+.pend-card b{color:#fbbf24}
+.pend-card button{background:#fbbf24;color:#0f172a;border:none;border-radius:7px;padding:8px 13px;font-size:12px;font-weight:700;cursor:pointer;margin-top:8px}
+.btn-ghost{background:none;border:.5px solid var(--border2);border-radius:var(--radius-sm);padding:12px;font-size:13.5px;color:var(--text);cursor:pointer;width:100%;margin-top:8px;font-family:inherit}
+.btn-ghost:active{background:var(--surface2)}
 </style>
 </head>
 <body>
@@ -198,8 +237,14 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
     <p>Controle familiar · 2026</p>
   </div>
   <div class="sync-bar"><div class="sync-dot" id="syncDot"></div><span id="syncLabel">Carregando...</span></div>
+  <div class="pend-card" id="pendCard"></div>
   <div class="month-scroll" id="msel-d"></div>
   <div class="metrics" id="metrics-d"></div>
+  <div class="ig-card" id="igCard"></div>
+  <div class="chart-card">
+    <div class="ct">Tetos do mês — <span id="tetoMesLbl"></span></div>
+    <div id="tetoList"></div>
+  </div>
   <div class="chart-card">
     <div class="ct">Entradas vs saídas (¥)</div>
     <div style="position:relative;height:190px"><canvas id="barChart" role="img" aria-label="Entradas e saídas mensais"></canvas></div>
@@ -263,6 +308,10 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
     <input type="color" id="nCatCor" value="#38bdf8" style="width:100%;height:44px;border-radius:var(--radius-sm);border:.5px solid var(--border2);cursor:pointer;padding:4px;background:var(--surface2)" />
   </div>
   <button class="btn-add" style="margin-top:8px" onclick="addCat()">+ Criar categoria</button>
+  <div class="sec-label" style="margin-top:22px">🎯 Tetos mensais (¥)</div>
+  <div class="info-card" style="margin-bottom:9px">Defina o limite de gasto por categoria. <strong>0 = sem teto.</strong> O dashboard mostra quanto já foi usado em cada um.</div>
+  <div class="chart-card" id="tetoEdit"></div>
+  <button class="btn-ghost" onclick="restaurarTetosPlano()">↺ Restaurar tetos do plano financeiro</button>
   <div class="sec-label" style="margin-top:22px">Resumo anual por categoria</div>
   <div style="overflow-x:auto"><table class="st" id="anualTbl"><thead></thead><tbody></tbody></table></div>
 </div>
@@ -302,10 +351,14 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
   <div class="info-card" id="connInfo">Carregando...</div>
   <div class="sec-label">Status dos dados</div>
   <div class="chart-card" id="dataStatus" style="font-size:13px;color:var(--muted);line-height:1.8"></div>
-  <button class="btn-add" style="margin-top:10px" onclick="openSetup()">⚙ Reconfigurar conexão</button>
+  <div class="sec-label">Fila de envio</div>
+  <div class="chart-card" id="outboxStatus" style="font-size:13px;color:var(--muted);line-height:1.8"></div>
+  <button class="btn-add" style="margin-top:10px" onclick="flushOutbox(true)">☁ Reenviar pendências agora</button>
+  <button class="btn-ghost" onclick="baixarBackup()">⬇ Baixar backup (.json)</button>
+  <button class="btn-ghost" onclick="openSetup()">⚙ Reconfigurar conexão</button>
   <div class="danger-card">
     <div class="dt">⚠ Zona de perigo</div>
-    <p>Apaga todos os dados locais e restaura apenas Abril, Maio e Junho originais.</p>
+    <p><strong style="color:var(--red)">Apaga TODOS os lançamentos</strong> — inclusive Julho e tudo que você lançou depois — e volta ao estado original de Abril/Maio/Junho. Um backup é baixado antes, mas isso não pode ser desfeito na nuvem.</p>
     <button class="btn-danger" onclick="resetData()">Resetar todos os dados</button>
   </div>
 </div>
@@ -330,7 +383,7 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
 </nav>
 
 <script>
-const LS_KEY='kazoku-v5', LS_SB='kazoku-sb';
+const LS_KEY='kazoku-v5', LS_SB='kazoku-sb', LS_OUT='kazoku-outbox';
 const ALL_MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const PAGES=['dashboard','lancamentos','categorias','conversor','config'];
 
@@ -461,9 +514,20 @@ const INITIAL_LANC=[
   {id:'j46',mes:'Junho',tipo:'despesa',descricao:'Kyorindo',subitem:'Kyorindo',valor:3999,dia:15,cat:'mercado'},
 ];
 
+// ── TETOS DO PLANO FINANCEIRO (¥/mês) ─────────────────────
+// Limites definidos no diagnóstico de jul/2026. 0 ou ausente = sem teto.
+const TETOS_PLANO={
+  mercado:62000, lojas:15000, restaurante:8000, kombini:3000, compras_online:4000,
+  transporte:9000, alimentacao:6500, vestuario:2500, educacao:12000, assinaturas:6700
+};
+// Categoria da igreja (criada automaticamente, não altera lançamentos antigos)
+const CAT_IGREJA={id:'igreja',name:'⛪ Igreja',color:'#c4b5fd',ord:21,
+  items:['Dízimo','Oferta','Lanche Igreja','Contribuição/Evento','Doação']};
+
 // ── STATE ──────────────────────────────────────────────────
-let S={lancamentos:[],categorias:[],brlRate:31.72,rateTS:'',taxas:{}};
+let S={lancamentos:[],categorias:[],brlRate:31.72,rateTS:'',taxas:{},tetos:null,dizimoPct:10};
 let SB=null,useCloud=false,curTipo='despesa';
+let OUT=[];
 // Set current month as default
 const _nowMonth=new Date().getMonth(); // 0=Jan, 5=Jun
 let curMonth=ALL_MONTHS[_nowMonth]||'Junho';
@@ -491,7 +555,74 @@ function setSyncStatus(s,l){
 
 // ── STORAGE ────────────────────────────────────────────────
 function saveLocal(){try{localStorage.setItem(LS_KEY,JSON.stringify(S));}catch(e){}}
-function loadLocal(){try{const r=localStorage.getItem(LS_KEY);if(r){S=JSON.parse(r);return true;}}catch(e){}return false;}
+function loadLocal(){
+  try{
+    const r=localStorage.getItem(LS_KEY);
+    if(r){
+      const p=JSON.parse(r);
+      // merge com os defaults para não perder campos novos em versões antigas
+      S={lancamentos:[],categorias:[],brlRate:31.72,rateTS:'',taxas:{},tetos:null,dizimoPct:10,...p};
+      if(!Array.isArray(S.lancamentos))S.lancamentos=[];
+      if(!Array.isArray(S.categorias))S.categorias=[];
+      if(!S.taxas||typeof S.taxas!=='object')S.taxas={};
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+function getTetos(){return (S.tetos&&typeof S.tetos==='object')?S.tetos:TETOS_PLANO;}
+// Garante o conjunto base de categorias + a Igreja, sem tocar em lançamentos antigos.
+// Idempotente e independente da ordem em que é chamada.
+function ensureCats(){
+  if(!Array.isArray(S.categorias))S.categorias=[];
+  if(!S.catsInit){
+    const have=new Set(S.categorias.map(c=>c.id));
+    INITIAL_CATS.forEach(ic=>{if(!have.has(ic.id))S.categorias.push(JSON.parse(JSON.stringify(ic)));});
+    S.catsInit=true;
+  }
+  if(!S.categorias.some(c=>c.id==='igreja'))S.categorias.push(JSON.parse(JSON.stringify(CAT_IGREJA)));
+  S.categorias.forEach(c=>{if(!Array.isArray(c.items))c.items=[];});
+}
+
+// ── OUTBOX — nada se perde se a nuvem falhar ───────────────
+function loadOutbox(){try{OUT=JSON.parse(localStorage.getItem(LS_OUT)||'[]')||[];}catch(e){OUT=[];}if(!Array.isArray(OUT))OUT=[];}
+function saveOutbox(){try{localStorage.setItem(LS_OUT,JSON.stringify(OUT));}catch(e){}}
+function queueOp(op){OUT.push(op);saveOutbox();renderPend();}
+function pendCount(){return OUT.length;}
+async function flushOutbox(manual){
+  if(!useCloud||!SB){renderPend();if(manual)toast('Conecte ao Supabase primeiro','err');return;}
+  if(!OUT.length){renderPend();if(manual)toast('Nada pendente — tudo sincronizado ✓','ok');return;}
+  setSyncStatus('syncing','Enviando '+OUT.length+' pendência(s)...');
+  const rest=[];
+  for(const op of OUT){
+    try{
+      if(op.t==='ins')      await sbFetch('lancamentos','POST',op.d);
+      else if(op.t==='del') await sbFetch('lancamentos?id=eq.'+encodeURIComponent(op.id),'DELETE');
+      else if(op.t==='cfg') await cloudSetCfg(op.k,op.v);
+    }catch(e){
+      const msg=(e&&e.message)||'';
+      // duplicidade = já chegou na nuvem numa tentativa anterior
+      if(op.t==='ins'&&/duplicate key|23505|already exists/i.test(msg))continue;
+      rest.push(op);
+    }
+  }
+  OUT=rest;saveOutbox();renderPend();
+  if(OUT.length){
+    setSyncStatus('error',OUT.length+' pendência(s) — vou tentar de novo');
+    if(manual)toast('Ainda restam '+OUT.length+' pendência(s)','err');
+  }else{
+    setSyncStatus('online','Tudo salvo na nuvem ✓');
+    if(manual)toast('Tudo sincronizado ✓','ok');
+  }
+  if(document.getElementById('page-config').classList.contains('active'))renderCfg();
+}
+function renderPend(){
+  const el=document.getElementById('pendCard');if(!el)return;
+  const n=pendCount();
+  if(!n){el.classList.remove('show');el.innerHTML='';return;}
+  el.classList.add('show');
+  el.innerHTML=`<b>⏳ ${n} lançamento(s) ainda não foram para a nuvem.</b><br>Estão guardados aqui no aparelho e nada será perdido. Vão subir sozinhos assim que houver internet.<br><button onclick="flushOutbox(true)">Tentar enviar agora</button>`;
+}
 
 // ── SUPABASE ───────────────────────────────────────────────
 async function sbFetch(path,method='GET',body=null){
@@ -506,31 +637,56 @@ async function sbFetch(path,method='GET',body=null){
 async function cloudLoad(){
   setSyncStatus('syncing','Sincronizando...');
   try{
-    const[lancs,cats,cfgs]=await Promise.all([
+    const[lancs,cfgs]=await Promise.all([
       sbFetch('lancamentos?select=*&order=created_at.asc'),
-      sbFetch('categorias?select=*&order=ord.asc'),
       sbFetch('config?select=*')
     ]);
-    S.lancamentos=lancs;
-    S.categorias=cats.length>0?cats:JSON.parse(JSON.stringify(INITIAL_CATS));
-    // Merge items from INITIAL_CATS (Supabase column may not store array)
+    const cloudIds=new Set(lancs.map(l=>l.id));
+    // Só preserva o que AINDA está na fila de envio (não confirmado na nuvem).
+    // O que já foi confirmado e sumiu da nuvem foi apagado de propósito em outro aparelho.
+    const pendentes=OUT.filter(o=>o.t==='ins'&&!cloudIds.has(o.d.id)).map(o=>o.d);
+    const apagados=new Set(OUT.filter(o=>o.t==='del').map(o=>o.id));
+    const anterior=S.lancamentos.length;
+    S.lancamentos=lancs.filter(l=>!apagados.has(l.id)).concat(pendentes);
+    // Rede de segurança: nuvem vazia com dados locais = NÃO apaga nada, reenvia.
+    if(lancs.length===0&&anterior>0){
+      setSyncStatus('error','Nuvem vazia — restaurando do aparelho');
+      S.lancamentos=loadLocal()?S.lancamentos:[];
+      S.lancamentos.forEach(l=>queueOp({t:'ins',d:l}));
+      await flushOutbox();
+      return true;
+    }
+    const cfg=k=>{const x=cfgs.find(c=>c.key===k);return x?x.value:null;};
+    const rr=cfg('brlRate'),rt=cfg('rateTS'),tx=cfg('taxas'),ct=cfg('categorias'),tt=cfg('tetos'),dz=cfg('dizimoPct');
+    if(rr)S.brlRate=parseFloat(rr);
+    if(rt)S.rateTS=rt;
+    if(tx){try{S.taxas=JSON.parse(tx);}catch(e){}}
+    if(ct){try{const p=JSON.parse(ct);if(Array.isArray(p)&&p.length)S.categorias=p;}catch(e){}}
+    if(tt){try{S.tetos=JSON.parse(tt);}catch(e){}}
+    if(dz!==null&&dz!==undefined&&dz!=='')S.dizimoPct=parseFloat(dz);
     S.categorias.forEach(c=>{
       if(typeof c.items==='string'){try{c.items=JSON.parse(c.items);}catch(e){c.items=[];}}
-      if(!c.items||c.items.length===0){
-        const init=INITIAL_CATS.find(ic=>ic.id===c.id);
-        c.items=init?JSON.parse(JSON.stringify(init.items)):[];
-      }
+      if(!c.items)c.items=[];
+      if(!c.items.length){const init=INITIAL_CATS.find(ic=>ic.id===c.id);if(init)c.items=JSON.parse(JSON.stringify(init.items));}
     });
-    const rr=cfgs.find(c=>c.key==='brlRate'),rt=cfgs.find(c=>c.key==='rateTS'),tx=cfgs.find(c=>c.key==='taxas');
-    if(rr)S.brlRate=parseFloat(rr.value);
-    if(rt)S.rateTS=rt.value;
-    if(tx)S.taxas=JSON.parse(tx.value);
-    if(S.lancamentos.length===0)await cloudSeed();
-    if(cats.length===0)await cloudSeedCats();
+    ensureCats();
     saveLocal();
-    setSyncStatus('online','Sincronizado com a nuvem');
+    setSyncStatus('online',pendCount()?pendCount()+' pendência(s) na fila':'Sincronizado com a nuvem');
     return true;
   }catch(e){setSyncStatus('error','Erro na sincronização');return false;}
+}
+// Salva categorias/tetos como JSON na tabela config (a tabela categorias não tem coluna items)
+function persistCats(){
+  saveLocal();
+  if(useCloud&&SB){queueOp({t:'cfg',k:'categorias',v:JSON.stringify(S.categorias)});flushOutbox();}
+}
+function persistTetos(){
+  saveLocal();
+  if(useCloud&&SB){queueOp({t:'cfg',k:'tetos',v:JSON.stringify(getTetos())});flushOutbox();}
+}
+function persistDizimo(){
+  saveLocal();
+  if(useCloud&&SB){queueOp({t:'cfg',k:'dizimoPct',v:String(S.dizimoPct)});flushOutbox();}
 }
 async function cloudSeed(){
   for(const c of INITIAL_CATS){try{await sbFetch('categorias','POST',c);}catch(e){}}
@@ -568,16 +724,36 @@ async function connectSupabase(){
 }
 function useLocal(){
   useCloud=false;SB=null;localStorage.removeItem(LS_SB);
-  if(!loadLocal()){S.lancamentos=JSON.parse(JSON.stringify(INITIAL_LANC));S.categorias=JSON.parse(JSON.stringify(INITIAL_CATS));saveLocal();}
+  if(!loadLocal()){S.lancamentos=JSON.parse(JSON.stringify(INITIAL_LANC));S.categorias=JSON.parse(JSON.stringify(INITIAL_CATS));}
+  ensureCats();saveLocal();
   document.getElementById('setupScreen').style.display='none';
   setSyncStatus('','Modo local');toast('Modo local ativado','ok');init();
 }
 async function boot(){
+  loadOutbox();
   const sbRaw=localStorage.getItem(LS_SB);
-  if(sbRaw){SB=JSON.parse(sbRaw);useCloud=true;const ok=await cloudLoad();if(!ok){loadLocal();setSyncStatus('error','Offline — dados locais');}init();}
-  else if(loadLocal()){setSyncStatus('','Modo local');init();}
+  if(sbRaw){
+    try{SB=JSON.parse(sbRaw);}catch(e){SB=null;}
+    if(SB){
+      useCloud=true;
+      loadLocal();            // carrega o aparelho PRIMEIRO — nada é descartado antes da nuvem responder
+      ensureCats();
+      const ok=await cloudLoad();
+      if(!ok)setSyncStatus('error','Offline — usando dados do aparelho');
+      init();renderPend();
+      flushOutbox();
+      return;
+    }
+  }
+  if(loadLocal()){ensureCats();setSyncStatus('','Modo local');init();renderPend();}
   else{document.getElementById('setupScreen').style.display='flex';}
 }
+// Reenvia pendências sozinho: ao voltar a internet, ao reabrir o app e a cada 60s
+window.addEventListener('online',()=>flushOutbox());
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)flushOutbox();});
+setInterval(()=>{if(pendCount()&&navigator.onLine)flushOutbox();},60000);
+// Avisa antes de fechar se algo ainda não subiu
+window.addEventListener('beforeunload',e=>{if(pendCount()){e.preventDefault();e.returnValue='';}});
 function init(){goPage('dashboard');}
 
 // ── NAV ────────────────────────────────────────────────────
@@ -618,6 +794,7 @@ function renderDash(){
     <div class="metric pos"><div class="lb">Entradas</div><div class="vl">¥${fmt(te)}</div><div class="sb">${curMonth}</div></div>
     <div class="metric ${sl>=0?'pos':'neg'}"><div class="lb">Saldo</div><div class="vl">¥${fmt(sl)}</div><div class="sb">${sl>=0?'Positivo':'Negativo'}</div></div>
     <div class="metric acc"><div class="lb">Meses</div><div class="vl">${getMonths().length}</div><div class="sb">registrados</div></div>`;
+  renderIgreja(months);renderTetos(months);
   renderBarChart(months);renderPieChart(months);renderLineChart();
   const all=[];
   months.forEach(m=>lancBy(m,'despesa').forEach(x=>all.push({...x,month:m})));
@@ -632,6 +809,104 @@ function renderDash(){
       </div>
       <div class="ei-amount" style="color:var(--red)">¥${fmt(x.valor)}</div>
     </div>`).join('')||'<div class="empty">Nenhuma despesa registrada</div>';
+}
+// ── TETOS ──────────────────────────────────────────────────
+function renderTetos(months){
+  const el=document.getElementById('tetoList');if(!el)return;
+  const lbl=document.getElementById('tetoMesLbl');if(lbl)lbl.textContent=curMonth;
+  const T=getTetos(),n=months.length||1;
+  const ids=Object.keys(T).filter(k=>T[k]>0);
+  if(!ids.length){el.innerHTML='<div style="font-size:12px;color:var(--muted);padding:6px 0">Nenhum teto definido. Configure na aba <strong>Categorias</strong>.</div>';return;}
+  const gasto={};
+  months.forEach(m=>lancBy(m,'despesa').forEach(x=>{gasto[x.cat]=(gasto[x.cat]||0)+x.valor;}));
+  ids.sort((a,b)=>((gasto[b]||0)/(T[b]*n))-((gasto[a]||0)/(T[a]*n)));
+  el.innerHTML=ids.map(id=>{
+    const teto=T[id]*n,usado=gasto[id]||0;
+    const pct=teto?(usado/teto)*100:0;
+    const cls=pct>100?'tt-over':pct>=80?'tt-warn':'tt-ok';
+    const cor=pct>100?'var(--red)':pct>=80?'#fbbf24':'var(--green)';
+    const c=getCat(id),resta=teto-usado;
+    return `<div class="teto-row">
+      <div class="teto-top">
+        <div class="teto-dot" style="background:${c.color}"></div>
+        <div class="teto-name">${c.name}</div>
+        <div class="teto-val"><b style="color:${cor}">¥${fmt(usado)}</b> / ¥${fmt(teto)}</div>
+      </div>
+      <div class="teto-bar"><div class="teto-fill" style="width:${Math.min(100,pct)}%;background:${cor}"></div></div>
+      <div class="teto-pct"><span class="${cls}">${pct.toFixed(0)}% usado</span><span class="${cls}">${resta>=0?'resta ¥'+fmt(resta):'estourou ¥'+fmt(-resta)}</span></div>
+    </div>`;
+  }).join('');
+}
+function renderTetoEdit(){
+  const el=document.getElementById('tetoEdit');if(!el)return;
+  const T=getTetos();
+  el.innerHTML=S.categorias.filter(c=>c.id!=='income').map(c=>
+    `<div class="teto-edit">
+      <div class="tn"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${c.color};margin-right:6px"></span>${c.name}</div>
+      <input type="number" inputmode="numeric" min="0" step="500" value="${T[c.id]||0}" onchange="setTeto('${c.id}',this.value)" />
+    </div>`).join('');
+}
+function setTeto(id,v){
+  const n=Math.max(0,parseInt(v,10)||0);
+  const T=Object.assign({},getTetos());T[id]=n;S.tetos=T;
+  persistTetos();
+  toast(getCat(id).name+': '+(n?'teto ¥'+fmt(n):'sem teto'),'ok');
+}
+function restaurarTetosPlano(){
+  S.tetos=JSON.parse(JSON.stringify(TETOS_PLANO));
+  persistTetos();renderTetoEdit();
+  toast('Tetos do plano restaurados ✓','ok');
+}
+
+// ── IGREJA (dízimo % da renda + ofertas + lanches) ─────────
+const RX_DIZIMO=/d[ií]zimo/i, RX_OFERTA=/oferta/i, RX_IGREJA=/igreja|santa ceia|culto/i;
+function igrejaDoMes(months){
+  let dizimo=0,oferta=0,eventos=0;
+  months.forEach(m=>lancBy(m,'despesa').forEach(x=>{
+    const t=(x.descricao||'')+' '+(x.subitem||'');
+    if(!(x.cat==='igreja'||RX_DIZIMO.test(t)||RX_OFERTA.test(t)||RX_IGREJA.test(t)))return;
+    if(RX_DIZIMO.test(t))dizimo+=x.valor;
+    else if(RX_OFERTA.test(t))oferta+=x.valor;
+    else eventos+=x.valor;
+  }));
+  return {dizimo,oferta,eventos};
+}
+function renderIgreja(months){
+  const el=document.getElementById('igCard');if(!el)return;
+  const te=months.reduce((s,m)=>s+totalE(m),0);
+  const pct=(typeof S.dizimoPct==='number'&&isFinite(S.dizimoPct))?S.dizimoPct:10;
+  const devido=Math.round(te*pct/100);
+  const g=igrejaDoMes(months);
+  const falta=devido-g.dizimo;
+  const prog=devido?Math.min(100,(g.dizimo/devido)*100):0;
+  const cor=falta<=0?'var(--green)':'#c4b5fd';
+  el.innerHTML=`
+    <div class="ig-head">
+      <div class="ig-title">⛪ Igreja — ${curMonth}</div>
+      <div class="ig-pct">Dízimo <input type="number" min="0" max="100" step="0.5" value="${pct}" onchange="setDizimoPct(this.value)" />%</div>
+    </div>
+    <div class="ig-main">
+      <div>
+        <div class="ig-lb">Dízimo a dar</div>
+        <div class="ig-big" style="color:${cor}">¥${fmt(devido)}</div>
+        <div class="ig-sub">${pct}% de ¥${fmt(te)} recebidos</div>
+      </div>
+      <div style="text-align:right">
+        <div class="ig-lb">${falta<=0?'Situação':'Ainda falta'}</div>
+        <div class="ig-big" style="color:${falta<=0?'var(--green)':'var(--red)'}">${falta<=0?'✓':'¥'+fmt(falta)}</div>
+        <div class="ig-sub">${falta<=0?(devido?'dízimo em dia':'sem entradas ainda'):'já dado: ¥'+fmt(g.dizimo)}</div>
+      </div>
+    </div>
+    <div class="teto-bar"><div class="teto-fill" style="width:${prog}%;background:${cor}"></div></div>
+    <div class="ig-grid">
+      <div class="ig-cell"><div class="v" style="color:#c4b5fd">¥${fmt(g.dizimo)}</div><div class="k">Dízimo lançado</div></div>
+      <div class="ig-cell"><div class="v" style="color:#c4b5fd">¥${fmt(g.oferta)}</div><div class="k">Ofertas</div></div>
+      <div class="ig-cell"><div class="v" style="color:#c4b5fd">¥${fmt(g.eventos)}</div><div class="k">Lanches/eventos</div></div>
+    </div>`;
+}
+function setDizimoPct(v){
+  const n=Math.max(0,Math.min(100,parseFloat(v)||0));
+  S.dizimoPct=n;persistDizimo();renderDash();
 }
 function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 function renderBarChart(months){
@@ -778,11 +1053,9 @@ async function addEntry(){
   document.getElementById('miniRealInput').value='';
   document.getElementById('miniYenResult').textContent='¥ —';
   renderLanc();toast(curTipo==='despesa'?'Despesa registrada ✓':'Entrada registrada ✓','ok');
-  if(useCloud&&SB){
-    setSyncStatus('syncing','Salvando...');
-    try{await cloudInsert(entry);setSyncStatus('online','Salvo na nuvem');}
-    catch(e){setSyncStatus('error','Erro ao salvar na nuvem');}
-  }
+  // Vai para a fila ANTES de tentar a nuvem: se falhar, fica guardado e é reenviado depois.
+  if(useCloud&&SB){queueOp({t:'ins',d:entry});await flushOutbox();}
+  else renderPend();
 }
 
 function askDelete(id){
@@ -801,9 +1074,11 @@ async function confirmDelete(){
   S.lancamentos=S.lancamentos.filter(l=>l.id!==id);saveLocal();renderLanc();
   toast('Lançamento apagado','ok');
   if(useCloud&&SB){
-    setSyncStatus('syncing','Apagando...');
-    try{await cloudDelete(id);setSyncStatus('online','Sincronizado');}
-    catch(e){setSyncStatus('error','Erro ao apagar da nuvem');}
+    // se ainda estava na fila de envio, basta remover de lá
+    const antes=OUT.length;
+    OUT=OUT.filter(o=>!(o.t==='ins'&&o.d&&o.d.id===id));
+    if(OUT.length!==antes){saveOutbox();renderPend();}
+    else{queueOp({t:'del',id});await flushOutbox();}
   }
 }
 
@@ -843,6 +1118,7 @@ function renderCats(){
   });
   rows.push(`<tr><td style="font-weight:600">Total</td>${months.map(m=>`<td class="r" style="font-weight:600">¥${fmt(totalD(m))}</td>`).join('')}<td class="r" style="font-weight:600">¥${fmt(grand)}</td></tr>`);
   document.querySelector('#anualTbl tbody').innerHTML=rows.join('');
+  renderTetoEdit();
 }
 
 function toggleCat(id){
@@ -860,14 +1136,11 @@ function addCat(){
   if(!name)return;
   const cat={id:uid(),name,color,ord:S.categorias.length,items:[]};
   S.categorias.push(cat);document.getElementById('nCatNome').value='';
-  saveLocal();renderCats();
-  if(useCloud&&SB)cloudUpsertCat(cat).catch(()=>{});
+  persistCats();renderCats();
 }
 
 function delCat(i){
-  const cat=S.categorias[i];
-  S.categorias.splice(i,1);saveLocal();renderCats();
-  if(useCloud&&SB)cloudDeleteCat(cat.id).catch(()=>{});
+  S.categorias.splice(i,1);persistCats();renderCats();
 }
 
 function addItem(catId){
@@ -876,21 +1149,19 @@ function addItem(catId){
   const cat=S.categorias.find(c=>c.id===catId);if(!cat)return;
   if(!cat.items)cat.items=[];
   if(!cat.items.includes(val)){
-    cat.items.push(val);inp.value='';saveLocal();
+    cat.items.push(val);inp.value='';persistCats();
     const tags=document.getElementById('tags-'+catId);
     const span=document.createElement('span');
     span.className='item-tag';span.onclick=()=>delItem(catId,val);
     span.innerHTML=`${val}<span class="del-item">×</span>`;
     tags.appendChild(span);
-    if(useCloud&&SB)cloudUpsertCat(cat).catch(()=>{});
     toast(val+' adicionado ✓','ok');
   }
 }
 
 function delItem(catId,item){
   const cat=S.categorias.find(c=>c.id===catId);if(!cat)return;
-  cat.items=cat.items.filter(i=>i!==item);saveLocal();renderCats();
-  if(useCloud&&SB)cloudUpsertCat(cat).catch(()=>{});
+  cat.items=cat.items.filter(i=>i!==item);persistCats();renderCats();
 }
 
 // ── CONVERSOR ──────────────────────────────────────────────
@@ -953,7 +1224,32 @@ function renderCfg(){
     const nd=lancBy(m,'despesa').length,ne=lancBy(m,'entrada').length,sl=totalE(m)-totalD(m);
     html+=`<p style="margin-bottom:5px">• <strong style="color:var(--text)">${m}</strong>: ${nd} despesas · ${ne} entradas · <span style="color:${sl>=0?'var(--green)':'var(--red)'}">¥${fmt(sl)}</span></p>`;
   });
+  html+=`<p style="margin-top:8px;padding-top:8px;border-top:.5px solid var(--border)">Total: <strong style="color:var(--text)">${S.lancamentos.length}</strong> lançamentos</p>`;
   document.getElementById('dataStatus').innerHTML=html||'<span>Nenhum dado ainda.</span>';
+  const ob=document.getElementById('outboxStatus');
+  if(ob){
+    const n=pendCount();
+    ob.innerHTML=n
+      ?`<p style="color:#fbbf24"><strong>⏳ ${n} operação(ões) aguardando envio.</strong></p><p style="font-size:12px;margin-top:4px">Guardadas neste aparelho. Nada será perdido — sobem sozinhas quando houver internet.</p>`
+      :`<p style="color:var(--green)"><strong>✓ Nada pendente.</strong></p><p style="font-size:12px;margin-top:4px">Tudo que você lançou já está salvo na nuvem.</p>`;
+  }
+  renderPend();
+}
+// ── BACKUP ─────────────────────────────────────────────────
+function baixarBackup(){
+  try{
+    const dump={exportadoEm:new Date().toISOString(),versao:'v6',
+      lancamentos:S.lancamentos,categorias:S.categorias,tetos:getTetos(),
+      dizimoPct:S.dizimoPct,brlRate:S.brlRate,taxas:S.taxas,pendentes:OUT};
+    const blob=new Blob([JSON.stringify(dump,null,2)],{type:'application/json'});
+    const a=document.createElement('a');
+    const d=new Date(),p=x=>String(x).padStart(2,'0');
+    a.href=URL.createObjectURL(blob);
+    a.download=`orcamento-backup-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}.json`;
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+    toast('Backup baixado ✓ ('+S.lancamentos.length+' lançamentos)','ok');
+  }catch(e){toast('Não foi possível gerar o backup','err');}
 }
 async function syncMissing(){
   if(!useCloud||!SB){toast('Conecte ao Supabase primeiro','err');return;}
@@ -993,9 +1289,15 @@ async function syncMissing(){
   setTimeout(()=>goPage('dashboard'),1500);
 }
 async function resetData(){
-  const conf=prompt('⚠ ATENÇÃO: isso apaga TODOS os lançamentos!\n\nDigite RESETAR para confirmar:');
-  if(conf!=='RESETAR'){toast('Reset cancelado','err');return;}
-  S={lancamentos:JSON.parse(JSON.stringify(INITIAL_LANC)),categorias:JSON.parse(JSON.stringify(INITIAL_CATS)),brlRate:31.72,rateTS:'',taxas:{}};
+  const n=S.lancamentos.length;
+  const conf=prompt('⚠ ATENÇÃO\n\nIsto apaga os '+n+' lançamentos atuais (inclusive Julho e tudo que você lançou depois) e volta ao estado original de Abril/Maio/Junho.\n\nNÃO há como desfazer na nuvem.\n\nUm backup será baixado antes.\n\nDigite RESETAR para confirmar:');
+  if(conf!=='RESETAR'){toast('Reset cancelado — nada foi apagado','ok');return;}
+  baixarBackup();
+  await new Promise(r=>setTimeout(r,1200));
+  if(!confirm('Último aviso: apagar os '+n+' lançamentos agora?\n\nConfira se o backup foi baixado.')){toast('Reset cancelado','ok');return;}
+  OUT=[];saveOutbox();
+  S={lancamentos:JSON.parse(JSON.stringify(INITIAL_LANC)),categorias:JSON.parse(JSON.stringify(INITIAL_CATS)),brlRate:31.72,rateTS:'',taxas:{},tetos:JSON.parse(JSON.stringify(TETOS_PLANO)),dizimoPct:10};
+  ensureCats();
   if(useCloud&&SB){
     setSyncStatus('syncing','Resetando na nuvem...');
     try{
