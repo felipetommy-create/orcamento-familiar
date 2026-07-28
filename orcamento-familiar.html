@@ -206,6 +206,43 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
 .rv-item .vl{font-variant-numeric:tabular-nums;font-weight:600;flex-shrink:0}
 .rv-item .dt{font-size:11px;color:var(--muted);width:74px;text-align:right;flex-shrink:0}
 .rv-item.done .nm,.rv-item.done .vl{color:var(--green)}
+/* RECEBIMENTOS */
+.rc-card{background:linear-gradient(135deg,rgba(52,211,153,.09),rgba(167,139,250,.05));border:.5px solid rgba(52,211,153,.25);border-radius:var(--radius);padding:14px;margin-bottom:11px}
+.rc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.rc-title{font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.rc-gear{background:none;border:.5px solid var(--border2);border-radius:6px;color:var(--muted);font-size:11px;padding:4px 9px;cursor:pointer;font-family:inherit}
+.rc-tot{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:11px;padding-bottom:10px;border-bottom:.5px solid var(--border2)}
+.rc-tot div{text-align:center}
+.rc-tot .v{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.rc-tot .k{font-size:9.5px;color:var(--muted);margin-top:2px}
+.rc-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:.5px solid var(--border)}
+.rc-item:last-child{border-bottom:none}
+.rc-ic{width:18px;flex-shrink:0;text-align:center;font-size:13px}
+.rc-nm{flex:1;min-width:0}
+.rc-nm .n1{font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rc-nm .n2{font-size:10px;color:var(--muted);margin-top:1px}
+.rc-vl{text-align:right;flex-shrink:0}
+.rc-vl .v1{font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.rc-vl .v2{font-size:10px;color:var(--muted);margin-top:1px}
+.rc-item.ok .v1{color:var(--green)}
+.rc-item.late .v1{color:var(--red)}
+.rc-item.wait .v1{color:var(--muted)}
+.rc-edit{display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:.5px solid var(--border)}
+.rc-edit .en{flex:1;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rc-edit input{background:var(--surface2);border:.5px solid var(--border2);border-radius:6px;padding:6px 7px;font-size:12px;color:var(--text);text-align:right;-webkit-appearance:none;font-family:inherit}
+.rc-edit input.vl{width:78px}.rc-edit input.dd{width:46px}
+.rc-edit input:focus{outline:none;border-color:var(--green)}
+/* DICAS */
+.dk-card{background:rgba(56,189,248,.07);border:.5px solid rgba(56,189,248,.22);border-radius:var(--radius);padding:13px;margin-bottom:11px}
+.dk-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.dk-t{font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.dk-nx{background:none;border:.5px solid var(--border2);border-radius:6px;color:var(--muted);font-size:11px;padding:3px 9px;cursor:pointer;font-family:inherit}
+.dk-tt{font-size:13px;font-weight:600;margin-bottom:3px}
+.dk-d{font-size:12px;color:var(--muted);line-height:1.55}
+.dk-li{padding:10px 0;border-bottom:.5px solid var(--border)}
+.dk-li:last-child{border-bottom:none}
+.dk-li .li-t{font-size:13px;font-weight:600;margin-bottom:2px}
+.dk-li .li-d{font-size:12px;color:var(--muted);line-height:1.55}
 /* IMPORTADOR */
 .imp-card{background:var(--surface);border-radius:var(--radius);border:.5px solid var(--border);padding:13px;margin-bottom:16px}
 .imp-t{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
@@ -285,6 +322,8 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
   <div class="pend-card" id="pendCard"></div>
   <div class="month-scroll" id="msel-d"></div>
   <div class="metrics" id="metrics-d"></div>
+  <div class="dk-card" id="dkCard"></div>
+  <div class="rc-card" id="rcCard"></div>
   <div class="rv-card" id="rvCard"></div>
   <div class="ig-card" id="igCard"></div>
   <div class="chart-card">
@@ -402,6 +441,8 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
 <div id="page-config" class="page">
   <div class="page-header"><h1>Configurações</h1><p>Dados e sincronização</p></div>
   <div class="info-card" id="connInfo">Carregando...</div>
+  <div class="sec-label">💡 Guia rápido — o que fazer sempre</div>
+  <div class="chart-card" id="dkLista"></div>
   <div class="sec-label">Status dos dados</div>
   <div class="chart-card" id="dataStatus" style="font-size:13px;color:var(--muted);line-height:1.8"></div>
   <div class="sec-label">Fila de envio</div>
@@ -577,14 +618,53 @@ const TETOS_PLANO={
 // saldo/aporte em R$ (o dinheiro está no Brasil); custo essencial em ¥ (a vida é no Japão)
 const RESERVA_PADRAO={saldo:27.22, aporte:4153.51, mesesAlvo:9, custoMensalYen:199808};
 
+// ── RECEBIMENTOS PREVISTOS (calendário das fontes de renda) ──
+const RECEB_PADRAO=[
+  {id:'braz',      nome:'Braz',                   brl:1595, dia:28, conta:'BanPará · cai no mês anterior', rx:'braz'},
+  {id:'frente',    nome:'Aluguel casa da frente', brl:1640, dia:3,  conta:'conta da Elizamar',  rx:'frente|cleiton|lobo'},
+  {id:'ascom',     nome:'Governo Ascom',          brl:5000, dia:5,  conta:'conta da Elizamar',  rx:'ascom|mota'},
+  {id:'junior',    nome:'Junior do Macre',        brl:1500, dia:10, conta:'sua conta',          rx:'junior|macre|alvaro'},
+  {id:'marcia',    nome:'Aluguel casa de trás',   brl:1040, dia:15, conta:'conta da Elizamar',  rx:'tr[áa]s|marcia|trindade'},
+  {id:'keniston',  nome:'Keniston (via Elsaday)', brl:2500, dia:18, conta:'conta da Elizamar',  rx:'keniston|elsaday'},
+  {id:'moratorio', nome:'Anderson Moratório',     brl:2000, dia:30, conta:'sua conta',          rx:'morat|anderson'}
+];
+
+// ── DICAS / INSTRUÇÕES ─────────────────────────────────────
+const DICAS=[
+  {t:'Use a cotação efetiva, não a de mercado',
+   d:'O câmbio de mercado não é o que chega no seu bolso. Depois de IOF, spread e taxas, R$ 1 virou ¥30,02 em julho — e não ¥32. Ajuste a cotação aqui para a efetiva, senão o app mostra ienes que você não tem.'},
+  {t:'Junte as remessas: 2 por mês, não 9',
+   d:'Em julho foram 9 remessas para a Nomad. Cada uma paga IOF e spread do zero. Concentre em duas — uma por volta do dia 10 e outra do dia 20.'},
+  {t:'Divida os saques entre as 3 contas Nomad',
+   d:'Cada conta tem 2 saques antes da taxa de US$ 5. Entre você, a Elizamar e a Maria Eduarda são 6 saques livres por mês. Nunca esgote uma só.'},
+  {t:'Cartão sempre que aceitarem',
+   d:'Compra no cartão Nomad não paga taxa de konbini (¥110–220) nem os US$ 5 de saque. Deixe o dinheiro vivo para o que realmente só aceita cash.'},
+  {t:'Saque muito, poucas vezes',
+   d:'A taxa do ATM é fixa por operação. Um saque de ¥50.000 custa o mesmo que um de ¥10.000. Puxe o máximo que o cartão permitir por viagem.'},
+  {t:'Importe o extrato toda semana',
+   d:'Aba Lançar → Importar extrato Nubank (.csv). Reimportar nunca duplica. Teto que você só olha no dia 31 não serve para nada.'},
+  {t:'Pague-se primeiro: R$ 2.365 todo dia 30',
+   d:'É o valor exato da parcela do empréstimo que acabou. Seu orçamento já viveu 7 meses sem esse dinheiro — mande para a reserva antes de vê-lo na conta.'},
+  {t:'Respeite os tetos',
+   d:'Mercado ¥62.000 · Lojas ¥15.000 · Restaurante ¥8.000 · Kombini ¥3.000 · Online ¥4.000. Em julho, Lojas e Online passaram de 290% e 650%.'},
+  {t:'Lance o dízimo na categoria ⛪ Igreja',
+   d:'O painel calcula 10% do que entrou no mês e mostra quanto falta. Ofertas e lanches ficam separados, sem misturar com o dízimo.'},
+  {t:'Cobre quem atrasar',
+   d:'O painel de recebimentos marca em vermelho quem passou da data. Em julho o Moratório (R$ 2.000) não pagou — são 13% da renda do mês parados.'},
+  {t:'Baixe backup uma vez por mês',
+   d:'Configurações → Baixar backup (.json). Leva 5 segundos e guarda tudo: lançamentos, tetos, reserva e categorias.'},
+  {t:'Nunca use "Resetar todos os dados"',
+   d:'Aquele botão apaga Julho e tudo que veio depois, voltando a Abril/Maio/Junho. Ele existe só por segurança e não tem volta na nuvem.'}
+];
+
 // Categoria da igreja (criada automaticamente, não altera lançamentos antigos)
 const CAT_IGREJA={id:'igreja',name:'⛪ Igreja',color:'#c4b5fd',ord:21,
   items:['Dízimo','Oferta','Lanche Igreja','Contribuição/Evento','Doação']};
 
 // ── STATE ──────────────────────────────────────────────────
-let S={lancamentos:[],categorias:[],brlRate:31.72,rateTS:'',taxas:{},tetos:null,dizimoPct:10,reserva:null};
+let S={lancamentos:[],categorias:[],brlRate:31.72,rateTS:'',taxas:{},tetos:null,dizimoPct:10,reserva:null,recebimentos:null};
 let SB=null,useCloud=false,curTipo='despesa';
-let OUT=[];
+let OUT=[],editReceb=false,dicaIdx=null;
 // Set current month as default
 const _nowMonth=new Date().getMonth(); // 0=Jan, 5=Jun
 let curMonth=ALL_MONTHS[_nowMonth]||'Junho';
@@ -618,7 +698,7 @@ function loadLocal(){
     if(r){
       const p=JSON.parse(r);
       // merge com os defaults para não perder campos novos em versões antigas
-      S={lancamentos:[],categorias:[],brlRate:31.72,rateTS:'',taxas:{},tetos:null,dizimoPct:10,reserva:null,...p};
+      S={lancamentos:[],categorias:[],brlRate:31.72,rateTS:'',taxas:{},tetos:null,dizimoPct:10,reserva:null,recebimentos:null,...p};
       if(!Array.isArray(S.lancamentos))S.lancamentos=[];
       if(!Array.isArray(S.categorias))S.categorias=[];
       if(!S.taxas||typeof S.taxas!=='object')S.taxas={};
@@ -629,6 +709,13 @@ function loadLocal(){
 }
 function getTetos(){return (S.tetos&&typeof S.tetos==='object')?S.tetos:TETOS_PLANO;}
 function getReserva(){return Object.assign({},RESERVA_PADRAO,(S.reserva&&typeof S.reserva==='object')?S.reserva:{});}
+function getReceb(){
+  const base=JSON.parse(JSON.stringify(RECEB_PADRAO));
+  if(Array.isArray(S.recebimentos)){
+    S.recebimentos.forEach(r=>{const b=base.find(x=>x.id===r.id);if(b)Object.assign(b,r);});
+  }
+  return base;
+}
 // Garante o conjunto base de categorias + a Igreja, sem tocar em lançamentos antigos.
 // Idempotente e independente da ordem em que é chamada.
 function ensureCats(){
@@ -715,8 +802,9 @@ async function cloudLoad(){
       return true;
     }
     const cfg=k=>{const x=cfgs.find(c=>c.key===k);return x?x.value:null;};
-    const rr=cfg('brlRate'),rt=cfg('rateTS'),tx=cfg('taxas'),ct=cfg('categorias'),tt=cfg('tetos'),dz=cfg('dizimoPct'),rv=cfg('reserva');
+    const rr=cfg('brlRate'),rt=cfg('rateTS'),tx=cfg('taxas'),ct=cfg('categorias'),tt=cfg('tetos'),dz=cfg('dizimoPct'),rv=cfg('reserva'),rb=cfg('recebimentos');
     if(rv){try{S.reserva=JSON.parse(rv);}catch(e){}}
+    if(rb){try{const p=JSON.parse(rb);if(Array.isArray(p))S.recebimentos=p;}catch(e){}}
     if(rr)S.brlRate=parseFloat(rr);
     if(rt)S.rateTS=rt;
     if(tx){try{S.taxas=JSON.parse(tx);}catch(e){}}
@@ -750,6 +838,10 @@ function persistDizimo(){
 function persistReserva(){
   saveLocal();
   if(useCloud&&SB){queueOp({t:'cfg',k:'reserva',v:JSON.stringify(getReserva())});flushOutbox();}
+}
+function persistReceb(){
+  saveLocal();
+  if(useCloud&&SB){queueOp({t:'cfg',k:'recebimentos',v:JSON.stringify(getReceb())});flushOutbox();}
 }
 async function cloudSeed(){
   for(const c of INITIAL_CATS){try{await sbFetch('categorias','POST',c);}catch(e){}}
@@ -857,7 +949,7 @@ function renderDash(){
     <div class="metric pos"><div class="lb">Entradas</div><div class="vl">¥${fmt(te)}</div><div class="sb">${curMonth}</div></div>
     <div class="metric ${sl>=0?'pos':'neg'}"><div class="lb">Saldo</div><div class="vl">¥${fmt(sl)}</div><div class="sb">${sl>=0?'Positivo':'Negativo'}</div></div>
     <div class="metric acc"><div class="lb">Meses</div><div class="vl">${getMonths().length}</div><div class="sb">registrados</div></div>`;
-  renderReserva();renderIgreja(months);renderTetos(months);
+  renderDica();renderReceb();renderReserva();renderIgreja(months);renderTetos(months);
   renderBarChart(months);renderPieChart(months);renderLineChart();
   const all=[];
   months.forEach(m=>lancBy(m,'despesa').forEach(x=>all.push({...x,month:m})));
@@ -919,6 +1011,95 @@ function restaurarTetosPlano(){
   S.tetos=JSON.parse(JSON.stringify(TETOS_PLANO));
   persistTetos();renderTetoEdit();
   toast('Tetos do plano restaurados ✓','ok');
+}
+
+// ── RECEBIMENTOS PREVISTOS ────────────────────────────────
+function renderReceb(){
+  const el=document.getElementById('rcCard');if(!el)return;
+  const lista=getReceb(), taxa=S.brlRate||31.39;
+  const anual=(curMonth==='Anual');
+  const mes=anual?null:curMonth;
+  const hoje=new Date(), mesHoje=ALL_MONTHS[hoje.getMonth()], ehAtual=(mes===mesHoje);
+  const entradas=mes?lancBy(mes,'entrada'):[];
+  const usados=new Set();
+  const linhas=lista.map(r=>{
+    let achou=null;
+    if(mes){
+      achou=entradas.find(e=>{
+        if(usados.has(e.id))return false;
+        try{return new RegExp(r.rx,'i').test((e.descricao||'')+' '+(e.subitem||''));}catch(x){return false;}
+      });
+      if(achou)usados.add(achou.id);
+    }
+    const prevYen=Math.round(r.brl*taxa);
+    let st='wait',ic='⏳',txt='previsto dia '+r.dia;
+    if(achou){st='ok';ic='✅';txt='recebido dia '+(achou.dia||r.dia);}
+    else if(anual){st='wait';ic='📅';txt='previsto todo mês';}
+    else if(!ehAtual){st='late';ic='❌';txt='não recebido';}
+    else if(hoje.getDate()>r.dia){st='late';ic='🔴';txt='atrasado — venceu dia '+r.dia;}
+    return {r,achou,prevYen,st,ic,txt};
+  });
+  const recebido=linhas.filter(l=>l.achou).reduce((s,l)=>s+l.achou.valor,0);
+  const aReceber=linhas.filter(l=>!l.achou).reduce((s,l)=>s+l.prevYen,0);
+  const totalPrev=linhas.reduce((s,l)=>s+(l.achou?l.achou.valor:l.prevYen),0);
+  const naoRecebidos=linhas.filter(l=>!l.achou&&l.st==='late').length;
+  el.innerHTML=`
+    <div class="rc-head">
+      <div class="rc-title">📆 Recebimentos — ${curMonth}</div>
+      <button class="rc-gear" onclick="toggleEditReceb()">${editReceb?'✓ pronto':'⚙ editar'}</button>
+    </div>
+    ${editReceb?'':`
+    <div class="rc-tot">
+      <div><div class="v" style="color:var(--green)">¥${fmt(recebido)}</div><div class="k">já recebido</div></div>
+      <div><div class="v" style="color:${naoRecebidos?'var(--red)':'var(--muted)'}">¥${fmt(aReceber)}</div><div class="k">a receber</div></div>
+      <div><div class="v">¥${fmt(totalPrev)}</div><div class="k">total do mês</div></div>
+    </div>`}
+    ${editReceb
+      ? lista.map(r=>`<div class="rc-edit">
+          <div class="en">${r.nome}</div>
+          <input class="vl" type="number" step="10" min="0" value="${r.brl}" onchange="setReceb('${r.id}','brl',this.value)" title="Valor em R$" />
+          <input class="dd" type="number" min="1" max="31" value="${r.dia}" onchange="setReceb('${r.id}','dia',this.value)" title="Dia" />
+        </div>`).join('') + `<div class="rv-sub" style="margin-top:8px">Valor em R$ e dia previsto. A conversão para ¥ usa a cotação atual (¥${taxa.toFixed(2)}/R$).</div>`
+      : linhas.map(l=>`<div class="rc-item ${l.st}">
+          <div class="rc-ic">${l.ic}</div>
+          <div class="rc-nm"><div class="n1">${l.r.nome}</div><div class="n2">${l.r.conta} · ${l.txt}</div></div>
+          <div class="rc-vl">
+            <div class="v1">¥${fmt(l.achou?l.achou.valor:l.prevYen)}</div>
+            <div class="v2">R$ ${brl(l.r.brl)}</div>
+          </div>
+        </div>`).join('')}`;
+}
+function toggleEditReceb(){editReceb=!editReceb;renderReceb();}
+function setReceb(id,campo,v){
+  const lista=getReceb(), r=lista.find(x=>x.id===id);if(!r)return;
+  r[campo]=Math.max(0,parseFloat(v)||0);
+  S.recebimentos=lista;persistReceb();
+  toast(r.nome+' atualizado ✓','ok');
+}
+
+// ── DICAS ─────────────────────────────────────────────────
+function dicaDoDia(){
+  if(dicaIdx===null){
+    const d=new Date();
+    dicaIdx=(d.getFullYear()*372+d.getMonth()*31+d.getDate())%DICAS.length;
+  }
+  return DICAS[dicaIdx];
+}
+function renderDica(){
+  const el=document.getElementById('dkCard');if(!el)return;
+  const d=dicaDoDia();
+  el.innerHTML=`
+    <div class="dk-h">
+      <div class="dk-t">💡 Lembrete ${(dicaIdx%DICAS.length)+1}/${DICAS.length}</div>
+      <button class="dk-nx" onclick="proximaDica()">próxima →</button>
+    </div>
+    <div class="dk-tt">${d.t}</div>
+    <div class="dk-d">${d.d}</div>`;
+}
+function proximaDica(){dicaIdx=((dicaIdx===null?0:dicaIdx)+1)%DICAS.length;renderDica();}
+function renderDicasLista(){
+  const el=document.getElementById('dkLista');if(!el)return;
+  el.innerHTML=DICAS.map((d,i)=>`<div class="dk-li"><div class="li-t">${i+1}. ${d.t}</div><div class="li-d">${d.d}</div></div>`).join('');
 }
 
 // ── RESERVA DE EMERGÊNCIA ─────────────────────────────────
@@ -1496,7 +1677,7 @@ function renderCfg(){
       ?`<p style="color:#fbbf24"><strong>⏳ ${n} operação(ões) aguardando envio.</strong></p><p style="font-size:12px;margin-top:4px">Guardadas neste aparelho. Nada será perdido — sobem sozinhas quando houver internet.</p>`
       :`<p style="color:var(--green)"><strong>✓ Nada pendente.</strong></p><p style="font-size:12px;margin-top:4px">Tudo que você lançou já está salvo na nuvem.</p>`;
   }
-  renderPend();
+  renderPend();renderDicasLista();
 }
 // ── BACKUP ─────────────────────────────────────────────────
 function baixarBackup(){
