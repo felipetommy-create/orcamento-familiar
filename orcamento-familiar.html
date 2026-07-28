@@ -1090,9 +1090,12 @@ function renderReceb(){
     else if(hoje.getDate()>r.dia){st='late';ic='🔴';txt='atrasado — venceu dia '+r.dia;}
     return {r,achou,prevYen,st,ic,txt};
   });
-  const recebido=linhas.filter(l=>l.achou).reduce((s,l)=>s+l.achou.valor,0);
+  // entradas do mês que não pertencem a nenhuma fonte prevista (ex.: venda de móveis)
+  const outras=entradas.filter(e=>!usados.has(e.id));
+  const somaOutras=outras.reduce((s,e)=>s+e.valor,0);
+  const recebido=linhas.filter(l=>l.achou).reduce((s,l)=>s+l.achou.valor,0)+somaOutras;
   const aReceber=linhas.filter(l=>!l.achou).reduce((s,l)=>s+l.prevYen,0);
-  const totalPrev=linhas.reduce((s,l)=>s+(l.achou?l.achou.valor:l.prevYen),0);
+  const totalPrev=recebido+aReceber;
   const naoRecebidos=linhas.filter(l=>!l.achou&&l.st==='late').length;
   el.innerHTML=`
     <div class="rc-head">
@@ -1126,7 +1129,12 @@ function renderReceb(){
             <div class="v1">¥${fmt(l.achou?l.achou.valor:l.prevYen)}</div>
             <div class="v2">R$ ${brl(l.r.brl)}</div>
           </div>
-        </div>`).join('')}`;
+        </div>`).join('') + (somaOutras>0?`
+        <div class="rc-item ok" style="border-top:.5px solid var(--border2)">
+          <div class="rc-ic">➕</div>
+          <div class="rc-nm"><div class="n1">Outras entradas</div><div class="n2">${outras.length} lançamento(s) fora do calendário</div></div>
+          <div class="rc-vl"><div class="v1">¥${fmt(somaOutras)}</div><div class="v2">R$ ${brl(somaOutras/taxa)}</div></div>
+        </div>`:'')}`;
 }
 function toggleEditReceb(){editReceb=!editReceb;renderReceb();}
 function setReceb(id,campo,v){
