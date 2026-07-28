@@ -768,6 +768,15 @@ function ensureCats(){
     S.catsInit=true;
   }
   if(!S.categorias.some(c=>c.id==='igreja'))S.categorias.push(JSON.parse(JSON.stringify(CAT_IGREJA)));
+  // Se alguma categoria base sumiu mas ainda tem lançamentos apontando para ela,
+  // devolve — senão os gastos ficariam órfãos, sem nome, cor nem teto.
+  const usadas=new Set(S.lancamentos.map(l=>l.cat));
+  INITIAL_CATS.forEach(ic=>{
+    if(usadas.has(ic.id)&&!S.categorias.some(c=>c.id===ic.id)){
+      S.categorias.push(JSON.parse(JSON.stringify(ic)));
+    }
+  });
+  S.categorias.sort((a,b)=>(a.ord||0)-(b.ord||0));
   S.categorias.forEach(c=>{if(!Array.isArray(c.items))c.items=[];});
 }
 
@@ -1468,19 +1477,45 @@ function carregaTesseract(){
     document.head.appendChild(s);
   });
 }
-// Pega o total: prefere linha com palavra de total; senão o maior número plausível
-function extraiValor(txt){
-  const linhas=txt.split(/\n/);
-  const num=s=>{
-    const m=[...s.matchAll(/(?:¥|￥)?\s*([0-9][0-9.,]{1,9})/g)]
-      .map(x=>parseFloat(x[1].replace(/[.,](?=\d{3}\b)/g,'').replace(',','.')))
-      .filter(v=>isFinite(v)&&v>=10&&v<=999999);
-    return m.length?Math.max(...m):null;
-  };
-  const rxTot=/合\s*計|小\s*計|お買上|税込|total|totale|valor total|subtotal/i;
-  for(const l of linhas){ if(rxTot.test(l)){ const v=num(l); if(v)return v; } }
-  const todos=linhas.map(num).filter(Boolean);
-  return todos.length?Math.max(...todos):null;
+// Devolve o valor mais provável + candidatos, para o usuário corrigir num toque.
+// "TOTAL" costuma sair torto na OCR (T0TAL, TOTAI), por isso o padrão é frouxo.
+function extraiValores(txt){
+  const rxTot=/(合\s*計|小\s*計|税\s*込|お買上|t\s*[o0q]\s*t\s*a\s*[li1]|valor\s*total|subtotal)/i;
+  const rxIgnora=/(n[úu]m|tel|cnpj|cpf|cep|troco|dinheiro|預|釣)/i;
+  const cands=[];
+  txt.split(/\n/).forEach(l=>{
+    if(rxIgnora.test(l))return;
+    const eTot=rxTot.test(l);
+    const re=/(¥|￥|R\$)?\s*([0-9]{1,3}(?:[.,][0-9]{3})+|[0-9]{2,7})\b/g;
+    let m;
+    while((m=re.exec(l))!==null){
+      const v=parseInt(m[2].replace(/[.,]/g,''),10);
+      if(!isFinite(v)||v<10||v>9999999)continue;
+      if(/^(19|20)\d{2}$/.test(m[2])&&!eTot)continue;   // ano
+      cands.push({v,tot:eTot,moeda:!!m[1]});
+    }
+  });
+  if(!cands.length)return{valor:null,lista:[]};
+  cands.sort((a,b)=>(b.tot-a.tot)||(b.moeda-a.moeda)||(b.v-a.v));
+  const vistos=new Set(),lista=[];
+  cands.forEach(c=>{if(!vistos.has(c.v)){vistos.add(c.v);lista.push(c.v);}});
+  return{valor:lista[0],lista:lista.slice(0,6)};
+}
+// Casa o texto do cupom com os subitens das categorias (ex.: "PontoBrasil" -> Mercado)
+function sugereCategoria(txt){
+  const norm=s=>(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'');
+  const t=norm(txt);
+  for(const c of S.categorias){
+    if(c.id==='income')continue;
+    for(const it of (c.items||[])){
+      const n=norm(it);
+      if(n.length>=5&&t.includes(n))return{cat:c.id,item:it};
+    }
+  }
+  const cont={};
+  S.lancamentos.filter(l=>l.tipo==='despesa').forEach(l=>{cont[l.cat]=(cont[l.cat]||0)+1;});
+  const top=Object.keys(cont).sort((a,b)=>cont[b]-cont[a])[0];
+  return{cat:top||'mercado',item:''};
 }
 function extraiData(txt){
   let m=txt.match(/(\d{4})\s*[年\/\-.]\s*(\d{1,2})\s*[月\/\-.]\s*(\d{1,2})/);
@@ -1505,7 +1540,8 @@ async function lerComprovante(input){
       logger:m=>{ if(st&&m.status==='recognizing text')st.textContent='🔍 Lendo... '+Math.round((m.progress||0)*100)+'%'; }
     });
     const txt=(res&&res.data&&res.data.text)||'';
-    const val=extraiValor(txt), dt=extraiData(txt);
+    const vv=extraiValores(txt), val=vv.valor, dt=extraiData(txt);
+    const sug=sugereCategoria(txt);
     const hoje=new Date();
     const mes=ALL_MONTHS[(dt?dt.mes-1:hoje.getMonth())]||ALL_MONTHS[hoje.getMonth()];
     const dia=dt?dt.dia:hoje.getDate();
@@ -1517,18 +1553,20 @@ async function lerComprovante(input){
           <label>Valor em ¥</label>
           <input id="ocVal" type="number" inputmode="numeric" value="${val||''}" placeholder="digite o valor" />
           <label>Descrição</label>
-          <input id="ocDesc" placeholder="ex: Mega Don Quijote" />
+          <input id="ocDesc" value="${sug.item||''}" placeholder="ex: Mega Don Quijote" />
         </div>
       </div>
+      ${vv.lista.length>1?`<div style="margin-top:8px"><div style="font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Outros valores no cupom — toque para usar</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">${vv.lista.map(v=>`<button class="mpill" onclick="document.getElementById('ocVal').value=${v}">¥${fmt(v)}</button>`).join('')}</div></div>`:''}
       <div class="ocr-f">
         <div class="row2" style="margin-top:6px">
           <div><label>Mês</label><select id="ocMes">${ALL_MONTHS.map(m=>`<option ${m===mes?'selected':''}>${m}</option>`).join('')}</select></div>
           <div><label>Dia</label><input id="ocDia" type="number" min="1" max="31" value="${dia}" /></div>
         </div>
         <label>Categoria</label>
-        <select id="ocCat">${cats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select>
+        <select id="ocCat">${cats.map(c=>`<option value="${c.id}" ${c.id===sug.cat?'selected':''}>${c.name}</option>`).join('')}</select>
       </div>
-      <div class="ocr-st">${val?'✅ Valor detectado: <strong style="color:var(--green)">¥'+fmt(val)+'</strong>. Confira antes de registrar.':'⚠ Não consegui achar o valor — digite à mão.'}${dt?' Data lida do comprovante.':''}</div>
+      <div class="ocr-st">${val?'✅ Sugerido: <strong style="color:var(--green)">¥'+fmt(val)+'</strong> — <strong>confira no cupom</strong>, a leitura erra às vezes.':'⚠ Não achei o valor — digite à mão.'}${dt?' Data lida do cupom.':''}${sug.item?' Loja reconhecida: '+sug.item+'.':''}</div>
       <div class="imp-acts">
         <button class="btn-ghost" style="margin:0" onclick="fecharOCR()">Cancelar</button>
         <button class="btn-add" onclick="registrarOCR()">Registrar despesa</button>
@@ -1602,8 +1640,14 @@ function parseNubankCSV(txt){
   if(!/data/.test(cab)||!/valor/.test(cab)){toast('Não parece um extrato do Nubank','err');return;}
   const taxa=S.brlRate||31.39;
   const jaTem=new Set(S.lancamentos.map(l=>l.id));
-  // mesmo mês+tipo+valor+dia já existente = provável duplicata de um lançamento manual
-  const jaConteudo=new Set(S.lancamentos.map(l=>l.mes+'|'+l.tipo+'|'+l.valor+'|'+l.dia));
+  // Provável duplicata de lançamento manual: mesmo mês e tipo, dia próximo e
+  // valor parecido. Tolerância de 10% porque a cotação usada pode ter mudado
+  // entre o lançamento à mão e a importação.
+  const existentes=S.lancamentos.map(l=>({mes:l.mes,tipo:l.tipo,valor:l.valor,dia:l.dia||0}));
+  const pareceDup=(mes,tipo,yen,dia)=>existentes.some(l=>
+    l.mes===mes && l.tipo===tipo &&
+    Math.abs(l.dia-dia)<=2 &&
+    Math.abs(l.valor-yen)<=Math.max(60,yen*0.10));
   IMPORT_ROWS=[];
   for(let i=1;i<linhas.length;i++){
     const l=linhas[i];
@@ -1624,7 +1668,7 @@ function parseNubankCSV(txt){
     const dup=jaTem.has(id);
     const mes=ALL_MONTHS[mesIdx], tipo=valor<0?'despesa':'entrada';
     const yen=Math.round(Math.abs(valor)*taxa);
-    const dupMan=!dup&&jaConteudo.has(mes+'|'+tipo+'|'+yen+'|'+dia);
+    const dupMan=!dup&&pareceDup(mes,tipo,yen,dia);
     IMPORT_ROWS.push({
       id, mes, dia, brl:valor, valor:yen, tipo,
       descricao:cl.desc, cat:cl.cat,
