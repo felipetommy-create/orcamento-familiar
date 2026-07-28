@@ -1228,13 +1228,18 @@ function limpaDesc(s){
 function classificarNubank(desc){
   const d=desc.toLowerCase();
   const c=limpaDesc(desc);
+  const semPrefixo=x=>x.replace(/^Transfer[êe]ncia (Recebida|recebida pelo Pix|enviada pelo Pix)\s*-\s*/i,'');
+  // RDB = poupança do próprio Nubank. Aplicar/resgatar NÃO é despesa nem receita.
+  if(/\brdb\b|aplica[çc][ãa]o rdb|resgate rdb/.test(d)) return{desc:'Movimentação RDB (poupança)',cat:'outros',interno:true};
   if(/pagamento de fatura/.test(d))            return{desc:'Fatura Cartão de Crédito',cat:'contas',interno:false};
   if(/empr[ée]stimo/.test(d))                  return{desc:'Empréstimo Nubank',cat:'contas',interno:false};
   if(/nomad/.test(d))                          return{desc:'Transferência Nomad (dólar)',cat:'outros',interno:true};
   if(/valor adicionado na conta por cart/.test(d)) return{desc:'Pix no crédito (entrada técnica)',cat:'outros',interno:true};
-  if(/elizamar/.test(d))                       return{desc:c.replace(/^Transfer[êe]ncia (Recebida|enviada pelo Pix)\s*-\s*/i,''),cat:'outros',interno:true};
-  if(/transfer[êe]ncia recebida/.test(d))      return{desc:c.replace(/^Transfer[êe]ncia Recebida\s*-\s*/i,''),cat:'income',interno:false};
-  if(/pix/.test(d))                            return{desc:c.replace(/^Transfer[êe]ncia enviada pelo Pix\s*-\s*/i,''),cat:'outros',interno:false};
+  // transferências entre as contas do casal se anulam — não são renda nem gasto
+  if(/elizamar|felipe tommy/.test(d))          return{desc:semPrefixo(c),cat:'outros',interno:true};
+  if(/amazon|mercado ?livre|shopee|aliexpress|temu/.test(d)) return{desc:semPrefixo(c),cat:'compras_online',interno:false};
+  if(/transfer[êe]ncia recebida/.test(d))      return{desc:semPrefixo(c),cat:'income',interno:false};
+  if(/pix/.test(d))                            return{desc:semPrefixo(c),cat:'outros',interno:false};
   return{desc:c||'Lançamento Nubank',cat:'outros',interno:false};
 }
 function parseNubankCSV(txt){
