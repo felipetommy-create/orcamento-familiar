@@ -1235,8 +1235,10 @@ function classificarNubank(desc){
   if(/empr[ée]stimo/.test(d))                  return{desc:'Empréstimo Nubank',cat:'contas',interno:false};
   if(/nomad/.test(d))                          return{desc:'Transferência Nomad (dólar)',cat:'outros',interno:true};
   if(/valor adicionado na conta por cart/.test(d)) return{desc:'Pix no crédito (entrada técnica)',cat:'outros',interno:true};
-  // transferências entre as contas do casal se anulam — não são renda nem gasto
-  if(/elizamar|felipe tommy/.test(d))          return{desc:semPrefixo(c),cat:'outros',interno:true};
+  // transferências entre as contas da família se anulam — não são renda nem gasto.
+  // Maria Eduarda entra aqui: o dinheiro passa pela conta dela só para ganhar
+  // saques gratuitos a mais na Nomad, não é despesa.
+  if(/elizamar|felipe tommy|maria eduarda/.test(d)) return{desc:semPrefixo(c),cat:'outros',interno:true};
   if(/amazon|mercado ?livre|shopee|aliexpress|temu/.test(d)) return{desc:semPrefixo(c),cat:'compras_online',interno:false};
   if(/transfer[êe]ncia recebida/.test(d))      return{desc:semPrefixo(c),cat:'income',interno:false};
   if(/pix/.test(d))                            return{desc:semPrefixo(c),cat:'outros',interno:false};
