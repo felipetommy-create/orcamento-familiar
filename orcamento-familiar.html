@@ -206,6 +206,29 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
 .rv-item .vl{font-variant-numeric:tabular-nums;font-weight:600;flex-shrink:0}
 .rv-item .dt{font-size:11px;color:var(--muted);width:74px;text-align:right;flex-shrink:0}
 .rv-item.done .nm,.rv-item.done .vl{color:var(--green)}
+/* IMPORTADOR */
+.imp-card{background:var(--surface);border-radius:var(--radius);border:.5px solid var(--border);padding:13px;margin-bottom:16px}
+.imp-t{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.imp-file{display:block;width:100%;background:var(--surface2);border:1px dashed var(--border2);border-radius:var(--radius-sm);padding:14px;font-size:13px;color:var(--muted);text-align:center;cursor:pointer}
+.imp-file:active{border-color:var(--accent)}
+.imp-file input{display:none}
+.imp-prev{margin-top:11px;border-top:.5px solid var(--border2);padding-top:10px}
+.imp-sum{font-size:12px;color:var(--muted);margin-bottom:9px;line-height:1.6}
+.imp-sum b{color:var(--text)}
+.imp-row{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:.5px solid var(--border)}
+.imp-row:last-child{border-bottom:none}
+.imp-row.off{opacity:.42}
+.imp-ck{width:20px;height:20px;flex-shrink:0;margin-top:2px;accent-color:var(--accent);cursor:pointer}
+.imp-body{flex:1;min-width:0}
+.imp-d1{display:flex;align-items:baseline;gap:6px}
+.imp-desc{font-size:12.5px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.imp-val{font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0}
+.imp-d2{font-size:10.5px;color:var(--muted);margin-top:2px}
+.imp-tag{display:inline-block;font-size:9px;padding:1px 5px;border-radius:4px;margin-left:5px;vertical-align:middle}
+.imp-tag.int{background:rgba(251,191,36,.15);color:#fbbf24}
+.imp-tag.dup{background:rgba(148,163,184,.15);color:var(--muted)}
+.imp-sel{margin-top:5px;width:100%;background:var(--surface2);border:.5px solid var(--border2);border-radius:6px;padding:6px 8px;font-size:11.5px;color:var(--text);font-family:inherit;-webkit-appearance:none}
+.imp-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px}
 /* PENDENCIAS */
 .pend-card{background:rgba(251,191,36,.08);border:.5px solid rgba(251,191,36,.3);border-radius:var(--radius);padding:12px 13px;margin-bottom:11px;font-size:12px;color:#fde68a;line-height:1.6;display:none}
 .pend-card.show{display:block}
@@ -313,6 +336,13 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
       <input class="qa-input" id="fValor" type="number" inputmode="decimal" placeholder="Valor em ¥" min="0" />
       <button class="btn-add" id="addBtn" onclick="addEntry()">+ Registrar</button>
     </div>
+  </div>
+  <div class="imp-card">
+    <div class="imp-t">📥 Importar extrato Nubank (.csv)</div>
+    <label class="imp-file">Toque para escolher o arquivo CSV
+      <input type="file" accept=".csv,text/csv" onchange="abrirImport(this)" />
+    </label>
+    <div class="imp-prev" id="impPrev" style="display:none"></div>
   </div>
   <div class="month-scroll" id="msel-l"></div>
   <div class="sec-label">Saídas — <span id="lblMesD"></span></div>
@@ -1176,6 +1206,136 @@ async function confirmDelete(){
     if(OUT.length!==antes){saveOutbox();renderPend();}
     else{queueOp({t:'del',id});await flushOutbox();}
   }
+}
+
+// ── IMPORTADOR DE EXTRATO NUBANK (CSV) ────────────────────
+let IMPORT_ROWS=[];
+function abrirImport(input){
+  const f=input.files&&input.files[0];
+  if(!f){return;}
+  const rd=new FileReader();
+  rd.onload=()=>{try{parseNubankCSV(String(rd.result||''));}catch(e){toast('Não consegui ler este arquivo','err');}input.value='';};
+  rd.onerror=()=>{toast('Erro ao abrir o arquivo','err');input.value='';};
+  rd.readAsText(f,'UTF-8');
+}
+// Limpa CPF/CNPJ e dados de agência/conta da descrição — não precisamos guardar isso
+function limpaDesc(s){
+  return s.replace(/\s*-\s*[•\d][•\d.\-\/]*\s*-\s*.*$/,'')
+          .replace(/\s*-\s*\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}.*$/,'')
+          .replace(/\s*\(Transfer[êe]ncia enviada\)\s*/i,'')
+          .replace(/\s+/g,' ').trim();
+}
+function classificarNubank(desc){
+  const d=desc.toLowerCase();
+  const c=limpaDesc(desc);
+  if(/pagamento de fatura/.test(d))            return{desc:'Fatura Cartão de Crédito',cat:'contas',interno:false};
+  if(/empr[ée]stimo/.test(d))                  return{desc:'Empréstimo Nubank',cat:'contas',interno:false};
+  if(/nomad/.test(d))                          return{desc:'Transferência Nomad (dólar)',cat:'outros',interno:true};
+  if(/valor adicionado na conta por cart/.test(d)) return{desc:'Pix no crédito (entrada técnica)',cat:'outros',interno:true};
+  if(/elizamar/.test(d))                       return{desc:c.replace(/^Transfer[êe]ncia (Recebida|enviada pelo Pix)\s*-\s*/i,''),cat:'outros',interno:true};
+  if(/transfer[êe]ncia recebida/.test(d))      return{desc:c.replace(/^Transfer[êe]ncia Recebida\s*-\s*/i,''),cat:'income',interno:false};
+  if(/pix/.test(d))                            return{desc:c.replace(/^Transfer[êe]ncia enviada pelo Pix\s*-\s*/i,''),cat:'outros',interno:false};
+  return{desc:c||'Lançamento Nubank',cat:'outros',interno:false};
+}
+function parseNubankCSV(txt){
+  const linhas=txt.replace(/^\uFEFF/,'').split(/\r?\n/).filter(l=>l.trim());
+  if(linhas.length<2){toast('Arquivo vazio','err');return;}
+  const cab=linhas[0].toLowerCase();
+  if(!/data/.test(cab)||!/valor/.test(cab)){toast('Não parece um extrato do Nubank','err');return;}
+  const taxa=S.brlRate||31.39;
+  const jaTem=new Set(S.lancamentos.map(l=>l.id));
+  // mesmo mês+tipo+valor+dia já existente = provável duplicata de um lançamento manual
+  const jaConteudo=new Set(S.lancamentos.map(l=>l.mes+'|'+l.tipo+'|'+l.valor+'|'+l.dia));
+  IMPORT_ROWS=[];
+  for(let i=1;i<linhas.length;i++){
+    const l=linhas[i];
+    // Data,Valor,Identificador,Descrição — só as 3 primeiras vírgulas separam
+    const p1=l.indexOf(','), p2=l.indexOf(',',p1+1), p3=l.indexOf(',',p2+1);
+    if(p1<0||p2<0||p3<0)continue;
+    const dataTxt=l.slice(0,p1).trim();
+    const valor=parseFloat(l.slice(p1+1,p2));
+    const ident=l.slice(p2+1,p3).trim();
+    const descTxt=l.slice(p3+1).trim().replace(/^"|"$/g,'');
+    const m=dataTxt.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if(!m||!isFinite(valor)||valor===0)continue;
+    const dia=parseInt(m[1],10), mesIdx=parseInt(m[2],10)-1;
+    if(mesIdx<0||mesIdx>11)continue;
+    // sufixo c/d resolve o par estorno que compartilha o mesmo identificador
+    const id='nu_'+ident+'_'+(valor<0?'d':'c');
+    const cl=classificarNubank(descTxt);
+    const dup=jaTem.has(id);
+    const mes=ALL_MONTHS[mesIdx], tipo=valor<0?'despesa':'entrada';
+    const yen=Math.round(Math.abs(valor)*taxa);
+    const dupMan=!dup&&jaConteudo.has(mes+'|'+tipo+'|'+yen+'|'+dia);
+    IMPORT_ROWS.push({
+      id, mes, dia, brl:valor, valor:yen, tipo,
+      descricao:cl.desc, cat:cl.cat,
+      interno:cl.interno, dup, dupMan,
+      marcar:!dup&&!dupMan&&!cl.interno
+    });
+  }
+  if(!IMPORT_ROWS.length){toast('Nenhuma transação reconhecida','err');return;}
+  renderImport();
+}
+function renderImport(){
+  const el=document.getElementById('impPrev');if(!el)return;
+  if(!IMPORT_ROWS.length){el.style.display='none';el.innerHTML='';return;}
+  el.style.display='block';
+  const marcados=IMPORT_ROWS.filter(r=>r.marcar).length;
+  const dups=IMPORT_ROWS.filter(r=>r.dup).length;
+  const dupMans=IMPORT_ROWS.filter(r=>r.dupMan).length;
+  const ints=IMPORT_ROWS.filter(r=>r.interno&&!r.dup&&!r.dupMan).length;
+  const opts=S.categorias.map(c=>c.id);
+  el.innerHTML=`
+    <div class="imp-sum">
+      <b>${IMPORT_ROWS.length}</b> transações lidas · <b>${marcados}</b> selecionadas
+      ${dups?`<br><span style="color:var(--muted)">${dups} já importada(s) antes — bloqueadas</span>`:''}
+      ${dupMans?`<br><span style="color:var(--red)">⚠ ${dupMans} já parece(m) existir como lançamento manual — desmarcada(s)</span>`:''}
+      ${ints?`<br><span style="color:#fbbf24">${ints} transferência(s) interna(s) desmarcada(s) — marque se quiser incluir</span>`:''}
+      <br>Cotação: ¥${(S.brlRate||31.39).toFixed(2)}/R$
+    </div>
+    ${IMPORT_ROWS.map((r,i)=>`
+      <div class="imp-row ${r.marcar?'':'off'}">
+        <input class="imp-ck" type="checkbox" ${r.marcar?'checked':''} ${r.dup?'disabled':''} onchange="impToggle(${i},this.checked)" />
+        <div class="imp-body">
+          <div class="imp-d1">
+            <span class="imp-desc">${r.descricao}</span>
+            <span class="imp-val" style="color:${r.tipo==='despesa'?'var(--red)':'var(--green)'}">${r.tipo==='despesa'?'−':'+'}¥${fmt(r.valor)}</span>
+          </div>
+          <div class="imp-d2">
+            ${r.mes} dia ${r.dia} · R$ ${brl(Math.abs(r.brl))}
+            ${r.dup?'<span class="imp-tag dup">já importado</span>':''}
+            ${r.dupMan?'<span class="imp-tag int" style="background:rgba(248,113,113,.15);color:var(--red)">já existe?</span>':''}
+            ${r.interno&&!r.dup&&!r.dupMan?'<span class="imp-tag int">interna</span>':''}
+          </div>
+          <select class="imp-sel" onchange="impCat(${i},this.value)" ${r.dup?'disabled':''}>
+            ${opts.map(id=>`<option value="${id}" ${id===r.cat?'selected':''}>${getCat(id).name}</option>`).join('')}
+          </select>
+        </div>
+      </div>`).join('')}
+    <div class="imp-acts">
+      <button class="btn-ghost" style="margin:0" onclick="cancelarImport()">Cancelar</button>
+      <button class="btn-add" onclick="confirmarImport()">Importar ${marcados}</button>
+    </div>`;
+}
+function impToggle(i,v){if(IMPORT_ROWS[i]){IMPORT_ROWS[i].marcar=!!v;renderImport();}}
+function impCat(i,v){if(IMPORT_ROWS[i]){IMPORT_ROWS[i].cat=v;IMPORT_ROWS[i].tipo=(v==='income')?'entrada':IMPORT_ROWS[i].tipo;}}
+function cancelarImport(){IMPORT_ROWS=[];renderImport();toast('Importação cancelada','ok');}
+async function confirmarImport(){
+  const sel=IMPORT_ROWS.filter(r=>r.marcar&&!r.dup);
+  if(!sel.length){toast('Nada selecionado','err');return;}
+  let n=0;
+  for(const r of sel){
+    if(S.lancamentos.some(l=>l.id===r.id))continue;
+    const e={id:r.id,mes:r.mes,tipo:r.tipo,descricao:r.descricao,subitem:'',valor:r.valor,dia:r.dia,cat:r.cat};
+    S.lancamentos.push(e);
+    if(useCloud&&SB)queueOp({t:'ins',d:e});
+    n++;
+  }
+  saveLocal();
+  if(useCloud&&SB)await flushOutbox();
+  IMPORT_ROWS=[];renderImport();renderLanc();
+  toast(n+' lançamento(s) importado(s) ✓','ok');
 }
 
 // ── CATEGORIAS ─────────────────────────────────────────────
