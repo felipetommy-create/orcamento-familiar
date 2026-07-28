@@ -243,6 +243,26 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
 .dk-li:last-child{border-bottom:none}
 .dk-li .li-t{font-size:13px;font-weight:600;margin-bottom:2px}
 .dk-li .li-d{font-size:12px;color:var(--muted);line-height:1.55}
+/* OCR */
+.ocr-box{margin-top:11px;border-top:.5px solid var(--border2);padding-top:10px}
+.ocr-prev{display:flex;gap:10px;align-items:flex-start}
+.ocr-img{width:88px;height:110px;object-fit:cover;border-radius:8px;border:.5px solid var(--border2);flex-shrink:0}
+.ocr-f{flex:1;min-width:0}
+.ocr-f label{display:block;font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:6px 0 3px}
+.ocr-f input,.ocr-f select{width:100%;background:var(--surface2);border:.5px solid var(--border2);border-radius:7px;padding:8px 9px;font-size:13px;color:var(--text);-webkit-appearance:none;font-family:inherit}
+.ocr-f input:focus,.ocr-f select:focus{outline:none;border-color:var(--accent)}
+.ocr-st{font-size:11.5px;color:var(--muted);margin-top:7px;line-height:1.5}
+.ocr-raw{max-height:82px;overflow:auto;background:var(--surface2);border-radius:7px;padding:8px;font-size:10px;color:var(--muted);white-space:pre-wrap;margin-top:7px;font-family:ui-monospace,monospace}
+/* TAXA EFETIVA */
+.tx-row{display:flex;gap:7px;align-items:flex-end;margin-top:8px}
+.tx-row>div{flex:1}
+.tx-row label{display:block;font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.tx-row input{width:100%;background:var(--surface2);border:.5px solid var(--border2);border-radius:7px;padding:9px;font-size:13px;color:var(--text);-webkit-appearance:none;font-family:inherit}
+.tx-row input:focus{outline:none;border-color:var(--green)}
+.rate-in{background:var(--surface2);border:.5px solid var(--border2);border-radius:8px;padding:8px 10px;font-size:20px;font-weight:700;color:var(--accent);width:130px;-webkit-appearance:none;font-family:inherit}
+.rate-in:focus{outline:none;border-color:var(--accent)}
+.rc-del{background:none;border:none;color:var(--muted);font-size:17px;cursor:pointer;padding:2px 5px;flex-shrink:0}
+.rc-del:active{color:var(--red)}
 /* IMPORTADOR */
 .imp-card{background:var(--surface);border-radius:var(--radius);border:.5px solid var(--border);padding:13px;margin-bottom:16px}
 .imp-t{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
@@ -377,6 +397,13 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
     </div>
   </div>
   <div class="imp-card">
+    <div class="imp-t">📷 Ler comprovante (foto)</div>
+    <label class="imp-file">Tirar foto ou escolher imagem
+      <input type="file" accept="image/*" capture="environment" onchange="lerComprovante(this)" />
+    </label>
+    <div class="ocr-box" id="ocrBox" style="display:none"></div>
+  </div>
+  <div class="imp-card">
     <div class="imp-t">📥 Importar extrato Nubank (.csv)</div>
     <label class="imp-file">Toque para escolher o arquivo CSV
       <input type="file" accept=".csv,text/csv" onchange="abrirImport(this)" />
@@ -413,8 +440,24 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
   <div class="page-header"><h1>Conversor</h1><p>Real → Iene em tempo real</p></div>
   <div class="conv-card">
     <div class="rate-display">
-      <div><div class="rate-big" id="rateDisplay">¥ — / R$</div><div class="rate-sub" id="rateTS"></div></div>
-      <button class="rate-btn" onclick="fetchRate()">↻ Atualizar</button>
+      <div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:15px;color:var(--muted)">¥</span>
+          <input class="rate-in" id="rateInput" type="number" step="0.0001" min="0" onchange="setRateManual(this.value)" />
+          <span style="font-size:13px;color:var(--muted)">/ R$ 1,00</span>
+        </div>
+        <div class="rate-sub" id="rateTS"></div>
+      </div>
+      <button class="rate-btn" onclick="fetchRate()">↻ Mercado</button>
+    </div>
+    <div class="info-card" style="margin:0 0 11px">
+      <strong>Cotação efetiva</strong><br>A de mercado não é a que chega no seu bolso. Informe quanto saiu em reais e quanto chegou em ienes no mês — o app calcula e usa a real.
+      <div class="tx-row">
+        <div><label>R$ enviados</label><input id="efBRL" type="number" step="0.01" min="0" placeholder="9960,00" /></div>
+        <div><label>¥ recebidos</label><input id="efJPY" type="number" step="1" min="0" placeholder="299000" /></div>
+        <div style="flex:0 0 auto"><button class="rate-btn" onclick="calcEfetiva()">Aplicar</button></div>
+      </div>
+      <div id="efMsg" style="margin-top:7px"></div>
     </div>
     <div style="margin-bottom:13px">
       <div style="font-size:10px;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">Real (R$)</div>
@@ -710,11 +753,10 @@ function loadLocal(){
 function getTetos(){return (S.tetos&&typeof S.tetos==='object')?S.tetos:TETOS_PLANO;}
 function getReserva(){return Object.assign({},RESERVA_PADRAO,(S.reserva&&typeof S.reserva==='object')?S.reserva:{});}
 function getReceb(){
-  const base=JSON.parse(JSON.stringify(RECEB_PADRAO));
-  if(Array.isArray(S.recebimentos)){
-    S.recebimentos.forEach(r=>{const b=base.find(x=>x.id===r.id);if(b)Object.assign(b,r);});
-  }
-  return base;
+  // depois da primeira edição, a lista salva passa a ser a fonte da verdade
+  // (permite adicionar e remover fontes de renda)
+  if(Array.isArray(S.recebimentos)&&S.recebimentos.length)return JSON.parse(JSON.stringify(S.recebimentos));
+  return JSON.parse(JSON.stringify(RECEB_PADRAO));
 }
 // Garante o conjunto base de categorias + a Igreja, sem tocar em lançamentos antigos.
 // Idempotente e independente da ordem em que é chamada.
@@ -1059,7 +1101,15 @@ function renderReceb(){
           <div class="en">${r.nome}</div>
           <input class="vl" type="number" step="10" min="0" value="${r.brl}" onchange="setReceb('${r.id}','brl',this.value)" title="Valor em R$" />
           <input class="dd" type="number" min="1" max="31" value="${r.dia}" onchange="setReceb('${r.id}','dia',this.value)" title="Dia" />
-        </div>`).join('') + `<div class="rv-sub" style="margin-top:8px">Valor em R$ e dia previsto. A conversão para ¥ usa a cotação atual (¥${taxa.toFixed(2)}/R$).</div>`
+          <button class="rc-del" onclick="delReceb('${r.id}')" title="Remover">×</button>
+        </div>`).join('') + `
+        <div class="rc-edit" style="border-bottom:none;padding-top:10px">
+          <input class="en" id="ncNome" placeholder="Novo cliente / fonte" style="text-align:left;min-width:0" />
+          <input class="vl" id="ncBRL" type="number" step="10" min="0" placeholder="R$" />
+          <input class="dd" id="ncDia" type="number" min="1" max="31" placeholder="dia" />
+        </div>
+        <button class="btn-ghost" style="margin-top:6px" onclick="addReceb()">+ Adicionar fonte de renda</button>
+        <div class="rv-sub" style="margin-top:8px">Valor em R$ e dia previsto. O app procura o nome nos lançamentos de entrada para marcar como recebido — use o mesmo nome que você digita ao lançar. Conversão pela cotação atual (¥${taxa.toFixed(2)}/R$).</div>`
       : linhas.map(l=>`<div class="rc-item ${l.st}">
           <div class="rc-ic">${l.ic}</div>
           <div class="rc-nm"><div class="n1">${l.r.nome}</div><div class="n2">${l.r.conta} · ${l.txt}</div></div>
@@ -1075,6 +1125,24 @@ function setReceb(id,campo,v){
   r[campo]=Math.max(0,parseFloat(v)||0);
   S.recebimentos=lista;persistReceb();
   toast(r.nome+' atualizado ✓','ok');
+}
+function addReceb(){
+  const nome=(document.getElementById('ncNome').value||'').trim();
+  const brl=parseFloat(document.getElementById('ncBRL').value)||0;
+  const dia=parseInt(document.getElementById('ncDia').value,10)||1;
+  if(!nome||brl<=0){toast('Preencha nome e valor','err');return;}
+  const lista=getReceb();
+  lista.push({id:uid(),nome,brl,dia:Math.min(31,Math.max(1,dia)),conta:'',
+    rx:nome.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')});
+  lista.sort((a,b)=>a.dia-b.dia);
+  S.recebimentos=lista;persistReceb();renderReceb();
+  toast(nome+' adicionado ✓','ok');
+}
+function delReceb(id){
+  const lista=getReceb(), r=lista.find(x=>x.id===id);if(!r)return;
+  if(!confirm('Remover "'+r.nome+'" do painel de recebimentos?'))return;
+  S.recebimentos=lista.filter(x=>x.id!==id);persistReceb();renderReceb();
+  toast(r.nome+' removido','ok');
 }
 
 // ── DICAS ─────────────────────────────────────────────────
@@ -1389,6 +1457,108 @@ async function confirmDelete(){
   }
 }
 
+// ── LEITOR DE COMPROVANTES (OCR) ──────────────────────────
+let OCR_URL=null, ocrBusy=false;
+function carregaTesseract(){
+  if(window.Tesseract)return Promise.resolve();
+  return new Promise((ok,err)=>{
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+    s.onload=ok; s.onerror=()=>err(new Error('cdn'));
+    document.head.appendChild(s);
+  });
+}
+// Pega o total: prefere linha com palavra de total; senão o maior número plausível
+function extraiValor(txt){
+  const linhas=txt.split(/\n/);
+  const num=s=>{
+    const m=[...s.matchAll(/(?:¥|￥)?\s*([0-9][0-9.,]{1,9})/g)]
+      .map(x=>parseFloat(x[1].replace(/[.,](?=\d{3}\b)/g,'').replace(',','.')))
+      .filter(v=>isFinite(v)&&v>=10&&v<=999999);
+    return m.length?Math.max(...m):null;
+  };
+  const rxTot=/合\s*計|小\s*計|お買上|税込|total|totale|valor total|subtotal/i;
+  for(const l of linhas){ if(rxTot.test(l)){ const v=num(l); if(v)return v; } }
+  const todos=linhas.map(num).filter(Boolean);
+  return todos.length?Math.max(...todos):null;
+}
+function extraiData(txt){
+  let m=txt.match(/(\d{4})\s*[年\/\-.]\s*(\d{1,2})\s*[月\/\-.]\s*(\d{1,2})/);
+  if(m)return{dia:+m[3],mes:+m[2]};
+  m=txt.match(/\b(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})\b/);
+  if(m)return{dia:+m[1],mes:+m[2]};
+  return null;
+}
+async function lerComprovante(input){
+  const f=input.files&&input.files[0]; input.value='';
+  if(!f||ocrBusy)return;
+  ocrBusy=true;
+  const box=document.getElementById('ocrBox');
+  if(OCR_URL)URL.revokeObjectURL(OCR_URL);
+  OCR_URL=URL.createObjectURL(f);
+  box.style.display='block';
+  box.innerHTML=`<div class="ocr-prev"><img class="ocr-img" src="${OCR_URL}" alt="comprovante"><div class="ocr-f"><div class="ocr-st">⏳ Carregando o leitor... (só na primeira vez)</div></div></div>`;
+  try{
+    await carregaTesseract();
+    const st=box.querySelector('.ocr-st');
+    const res=await Tesseract.recognize(OCR_URL,'por+eng',{
+      logger:m=>{ if(st&&m.status==='recognizing text')st.textContent='🔍 Lendo... '+Math.round((m.progress||0)*100)+'%'; }
+    });
+    const txt=(res&&res.data&&res.data.text)||'';
+    const val=extraiValor(txt), dt=extraiData(txt);
+    const hoje=new Date();
+    const mes=ALL_MONTHS[(dt?dt.mes-1:hoje.getMonth())]||ALL_MONTHS[hoje.getMonth()];
+    const dia=dt?dt.dia:hoje.getDate();
+    const cats=S.categorias.filter(c=>c.id!=='income');
+    box.innerHTML=`
+      <div class="ocr-prev">
+        <img class="ocr-img" src="${OCR_URL}" alt="comprovante">
+        <div class="ocr-f">
+          <label>Valor em ¥</label>
+          <input id="ocVal" type="number" inputmode="numeric" value="${val||''}" placeholder="digite o valor" />
+          <label>Descrição</label>
+          <input id="ocDesc" placeholder="ex: Mega Don Quijote" />
+        </div>
+      </div>
+      <div class="ocr-f">
+        <div class="row2" style="margin-top:6px">
+          <div><label>Mês</label><select id="ocMes">${ALL_MONTHS.map(m=>`<option ${m===mes?'selected':''}>${m}</option>`).join('')}</select></div>
+          <div><label>Dia</label><input id="ocDia" type="number" min="1" max="31" value="${dia}" /></div>
+        </div>
+        <label>Categoria</label>
+        <select id="ocCat">${cats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select>
+      </div>
+      <div class="ocr-st">${val?'✅ Valor detectado: <strong style="color:var(--green)">¥'+fmt(val)+'</strong>. Confira antes de registrar.':'⚠ Não consegui achar o valor — digite à mão.'}${dt?' Data lida do comprovante.':''}</div>
+      <div class="imp-acts">
+        <button class="btn-ghost" style="margin:0" onclick="fecharOCR()">Cancelar</button>
+        <button class="btn-add" onclick="registrarOCR()">Registrar despesa</button>
+      </div>
+      <details style="margin-top:8px"><summary style="font-size:11px;color:var(--muted);cursor:pointer">ver texto lido</summary><div class="ocr-raw">${(txt||'(vazio)').replace(/[<>&]/g,'')}</div></details>`;
+  }catch(e){
+    box.innerHTML=`<div class="ocr-st" style="color:var(--red)">Não consegui carregar o leitor. Verifique a internet e tente de novo.</div>
+      <button class="btn-ghost" onclick="fecharOCR()">Fechar</button>`;
+  }
+  ocrBusy=false;
+}
+function fecharOCR(){
+  const box=document.getElementById('ocrBox');
+  if(box){box.style.display='none';box.innerHTML='';}
+  if(OCR_URL){URL.revokeObjectURL(OCR_URL);OCR_URL=null;}
+}
+async function registrarOCR(){
+  const valor=Math.round(parseFloat(document.getElementById('ocVal').value)||0);
+  const descricao=(document.getElementById('ocDesc').value||'').trim()||'Comprovante';
+  const mes=document.getElementById('ocMes').value;
+  const dia=parseInt(document.getElementById('ocDia').value,10)||1;
+  const cat=document.getElementById('ocCat').value;
+  if(valor<=0){toast('Informe o valor','err');return;}
+  const e={id:uid(),mes,tipo:'despesa',descricao,subitem:'',valor,dia,cat};
+  S.lancamentos.push(e);saveLocal();
+  fecharOCR();renderLanc();
+  toast('Despesa de ¥'+fmt(valor)+' registrada ✓','ok');
+  if(useCloud&&SB){queueOp({t:'ins',d:e});await flushOutbox();}
+}
+
 // ── IMPORTADOR DE EXTRATO NUBANK (CSV) ────────────────────
 let IMPORT_ROWS=[];
 function abrirImport(input){
@@ -1608,9 +1778,35 @@ function delItem(catId,item){
   cat.items=cat.items.filter(i=>i!==item);persistCats();renderCats();
 }
 
+// ── COTAÇÃO MANUAL / EFETIVA ──────────────────────────────
+function salvaRate(v,label){
+  S.brlRate=v; S.rateTS=label;
+  saveLocal();
+  if(useCloud&&SB){queueOp({t:'cfg',k:'brlRate',v:String(v)});queueOp({t:'cfg',k:'rateTS',v:label});flushOutbox();}
+  renderConv();updateMiniRateLabel();
+}
+function setRateManual(v){
+  const n=parseFloat(v)||0;
+  if(n<=0){toast('Cotação inválida','err');renderConv();return;}
+  salvaRate(n,new Date().toLocaleDateString('pt-BR')+' (manual)');
+  toast('Cotação ajustada para ¥'+n.toFixed(4),'ok');
+}
+function calcEfetiva(){
+  const b=parseFloat(document.getElementById('efBRL').value)||0;
+  const j=parseFloat(document.getElementById('efJPY').value)||0;
+  const msg=document.getElementById('efMsg');
+  if(b<=0||j<=0){msg.innerHTML='<span style="color:var(--red)">Preencha os dois valores.</span>';return;}
+  const ef=j/b, mercado=S.brlRate||0;
+  const perda=mercado>0?(1-ef/mercado)*100:0;
+  msg.innerHTML=`<strong style="color:var(--green)">¥ ${ef.toFixed(4)} por R$ 1,00</strong>`+
+    (mercado>0?` — ${perda>=0?perda.toFixed(1)+'% abaixo':Math.abs(perda).toFixed(1)+'% acima'} da cotação anterior`:'');
+  salvaRate(ef,new Date().toLocaleDateString('pt-BR')+' (efetiva)');
+  toast('Cotação efetiva aplicada ✓','ok');
+}
+
 // ── CONVERSOR ──────────────────────────────────────────────
 function renderConv(){
-  document.getElementById('rateDisplay').textContent=`¥ ${S.brlRate.toFixed(4)} / R$ 1,00`;
+  document.getElementById('rateInput').value=S.brlRate.toFixed(4);
   document.getElementById('rateTS').textContent=S.rateTS?'Atualizado em '+S.rateTS:'';
   document.getElementById('rateHistBody').innerHTML=getMonths().map(m=>{
     const te=totalE(m),tx=getTaxa(m);
@@ -1619,7 +1815,7 @@ function renderConv(){
 }
 
 async function fetchRate(){
-  document.getElementById('rateDisplay').textContent='Buscando...';
+  document.getElementById('rateTS').textContent='Buscando cotação de mercado...';
   // Use free public API - no CORS issues
   try{
     const r=await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/brl.json');
@@ -1640,7 +1836,7 @@ async function fetchRate(){
       S.brlRate=rate2;S.rateTS=new Date().toLocaleDateString('pt-BR');
       saveLocal();renderConv();toast('¥'+S.brlRate.toFixed(4)+'/R$ — Atualizado!','ok');
     }catch(e2){
-      document.getElementById('rateDisplay').textContent=`¥ ${S.brlRate.toFixed(4)} / R$ 1,00`;
+      document.getElementById('rateInput').value=S.brlRate.toFixed(4);
       toast('Usando cotação salva: ¥'+S.brlRate.toFixed(2),'err');
     }
   }
