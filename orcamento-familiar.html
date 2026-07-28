@@ -705,9 +705,9 @@ const CAT_IGREJA={id:'igreja',name:'⛪ Igreja',color:'#c4b5fd',ord:21,
   items:['Dízimo','Oferta','Lanche Igreja','Contribuição/Evento','Doação']};
 
 // ── STATE ──────────────────────────────────────────────────
-let S={lancamentos:[],categorias:[],brlRate:31.72,rateTS:'',taxas:{},tetos:null,dizimoPct:10,reserva:null,recebimentos:null};
+let S={lancamentos:[],categorias:[],brlRate:31.72,rateTS:'',taxas:{},tetos:null,dizimoPct:10,reserva:null,recebimentos:null,dizimoExcluir:null};
 let SB=null,useCloud=false,curTipo='despesa';
-let OUT=[],editReceb=false,dicaIdx=null;
+let OUT=[],editReceb=false,dicaIdx=null,editDizimo=false;
 // Set current month as default
 const _nowMonth=new Date().getMonth(); // 0=Jan, 5=Jun
 let curMonth=ALL_MONTHS[_nowMonth]||'Junho';
@@ -741,7 +741,7 @@ function loadLocal(){
     if(r){
       const p=JSON.parse(r);
       // merge com os defaults para não perder campos novos em versões antigas
-      S={lancamentos:[],categorias:[],brlRate:31.72,rateTS:'',taxas:{},tetos:null,dizimoPct:10,reserva:null,recebimentos:null,...p};
+      S={lancamentos:[],categorias:[],brlRate:31.72,rateTS:'',taxas:{},tetos:null,dizimoPct:10,reserva:null,recebimentos:null,dizimoExcluir:null,...p};
       if(!Array.isArray(S.lancamentos))S.lancamentos=[];
       if(!Array.isArray(S.categorias))S.categorias=[];
       if(!S.taxas||typeof S.taxas!=='object')S.taxas={};
@@ -856,6 +856,8 @@ async function cloudLoad(){
     const rr=cfg('brlRate'),rt=cfg('rateTS'),tx=cfg('taxas'),ct=cfg('categorias'),tt=cfg('tetos'),dz=cfg('dizimoPct'),rv=cfg('reserva'),rb=cfg('recebimentos');
     if(rv){try{S.reserva=JSON.parse(rv);}catch(e){}}
     if(rb){try{const p=JSON.parse(rb);if(Array.isArray(p))S.recebimentos=p;}catch(e){}}
+    const dx=cfg('dizimoExcluir');
+    if(dx){try{const p=JSON.parse(dx);if(Array.isArray(p))S.dizimoExcluir=p;}catch(e){}}
     if(rr)S.brlRate=parseFloat(rr);
     if(rt)S.rateTS=rt;
     if(tx){try{S.taxas=JSON.parse(tx);}catch(e){}}
@@ -893,6 +895,11 @@ function persistReserva(){
 function persistReceb(){
   saveLocal();
   if(useCloud&&SB){queueOp({t:'cfg',k:'recebimentos',v:JSON.stringify(getReceb())});flushOutbox();}
+}
+function getDizExcl(){return new Set(Array.isArray(S.dizimoExcluir)?S.dizimoExcluir:[]);}
+function persistDizExcl(){
+  saveLocal();
+  if(useCloud&&SB){queueOp({t:'cfg',k:'dizimoExcluir',v:JSON.stringify(S.dizimoExcluir||[])});flushOutbox();}
 }
 async function cloudSeed(){
   for(const c of INITIAL_CATS){try{await sbFetch('categorias','POST',c);}catch(e){}}
@@ -1265,7 +1272,11 @@ function igrejaDoMes(months){
 }
 function renderIgreja(months){
   const el=document.getElementById('igCard');if(!el)return;
-  const te=months.reduce((s,m)=>s+totalE(m),0);
+  const excl=getDizExcl();
+  const entradas=[];
+  months.forEach(m=>lancBy(m,'entrada').forEach(e=>entradas.push(e)));
+  const te=entradas.filter(e=>!excl.has(e.id)).reduce((s,e)=>s+e.valor,0);
+  const foraTot=entradas.filter(e=>excl.has(e.id)).reduce((s,e)=>s+e.valor,0);
   const pct=(typeof S.dizimoPct==='number'&&isFinite(S.dizimoPct))?S.dizimoPct:10;
   const devido=Math.round(te*pct/100);
   const g=igrejaDoMes(months);
@@ -1294,7 +1305,27 @@ function renderIgreja(months){
       <div class="ig-cell"><div class="v" style="color:#c4b5fd">¥${fmt(g.dizimo)}</div><div class="k">Dízimo lançado</div></div>
       <div class="ig-cell"><div class="v" style="color:#c4b5fd">¥${fmt(g.oferta)}</div><div class="k">Ofertas</div></div>
       <div class="ig-cell"><div class="v" style="color:#c4b5fd">¥${fmt(g.eventos)}</div><div class="k">Lanches/eventos</div></div>
+    </div>
+    <div style="margin-top:10px;padding-top:9px;border-top:.5px solid var(--border2)">
+      <button class="rc-gear" onclick="toggleEditDizimo()" style="width:100%">${editDizimo?'✓ pronto':'⚙ o que conta no dízimo'}${foraTot>0&&!editDizimo?' · ¥'+fmt(foraTot)+' fora':''}</button>
+      ${editDizimo?`<div style="margin-top:8px">
+        ${entradas.length?entradas.map(e=>`
+          <div class="rc-edit" style="gap:8px">
+            <input class="imp-ck" type="checkbox" ${excl.has(e.id)?'':'checked'} onchange="toggleDizItem('${e.id}')" />
+            <div class="en">${e.descricao||'(sem descrição)'}<div style="font-size:10px;color:var(--muted)">${e.mes} dia ${e.dia||'-'}</div></div>
+            <div style="font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;color:${excl.has(e.id)?'var(--muted)':'var(--green)'}">¥${fmt(e.valor)}</div>
+          </div>`).join('')
+        :'<div style="font-size:12px;color:var(--muted);padding:6px 0">Nenhuma entrada neste mês.</div>'}
+        <div class="rv-sub" style="margin-top:8px">Desmarque o que não deve entrar na base do dízimo — por exemplo venda de bens, reembolso ou devolução. Fica salvo e sincroniza entre os aparelhos.</div>
+      </div>`:''}
     </div>`;
+}
+function toggleEditDizimo(){editDizimo=!editDizimo;renderDash();}
+function toggleDizItem(id){
+  const lista=Array.isArray(S.dizimoExcluir)?S.dizimoExcluir.slice():[];
+  const i=lista.indexOf(id);
+  if(i>=0)lista.splice(i,1); else lista.push(id);
+  S.dizimoExcluir=lista;persistDizExcl();renderDash();
 }
 function setDizimoPct(v){
   const n=Math.max(0,Math.min(100,parseFloat(v)||0));
