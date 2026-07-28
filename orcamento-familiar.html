@@ -184,6 +184,28 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
 .ig-cell{text-align:center}
 .ig-cell .v{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
 .ig-cell .k{font-size:9.5px;color:var(--muted);margin-top:2px}
+/* RESERVA */
+.rv-card{background:linear-gradient(135deg,rgba(52,211,153,.12),rgba(56,189,248,.06));border:.5px solid rgba(52,211,153,.3);border-radius:var(--radius);padding:14px;margin-bottom:11px}
+.rv-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;gap:8px}
+.rv-title{font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.rv-in{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted)}
+.rv-in input{width:88px;background:var(--surface2);border:.5px solid var(--border2);border-radius:6px;padding:5px 7px;font-size:12px;color:var(--text);text-align:right;-webkit-appearance:none;font-family:inherit}
+.rv-in input:focus{outline:none;border-color:var(--green)}
+.rv-main{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:8px}
+.rv-big{font-size:23px;font-weight:700;letter-spacing:-.5px;color:var(--green);font-variant-numeric:tabular-nums}
+.rv-lb{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.rv-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.rv-track{position:relative;height:8px;border-radius:4px;background:var(--surface2);overflow:hidden;margin-bottom:3px}
+.rv-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#34d399,#38bdf8);transition:width .5s ease}
+.rv-marks{position:relative;height:12px;margin-bottom:9px}
+.rv-mark{position:absolute;top:0;transform:translateX(-50%);font-size:9px;color:var(--muted);white-space:nowrap}
+.rv-list{margin-top:11px;padding-top:10px;border-top:.5px solid var(--border2)}
+.rv-item{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px}
+.rv-item .ic{width:18px;flex-shrink:0;text-align:center}
+.rv-item .nm{flex:1;color:var(--muted)}
+.rv-item .vl{font-variant-numeric:tabular-nums;font-weight:600;flex-shrink:0}
+.rv-item .dt{font-size:11px;color:var(--muted);width:74px;text-align:right;flex-shrink:0}
+.rv-item.done .nm,.rv-item.done .vl{color:var(--green)}
 /* PENDENCIAS */
 .pend-card{background:rgba(251,191,36,.08);border:.5px solid rgba(251,191,36,.3);border-radius:var(--radius);padding:12px 13px;margin-bottom:11px;font-size:12px;color:#fde68a;line-height:1.6;display:none}
 .pend-card.show{display:block}
@@ -240,6 +262,7 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
   <div class="pend-card" id="pendCard"></div>
   <div class="month-scroll" id="msel-d"></div>
   <div class="metrics" id="metrics-d"></div>
+  <div class="rv-card" id="rvCard"></div>
   <div class="ig-card" id="igCard"></div>
   <div class="chart-card">
     <div class="ct">Tetos do mês — <span id="tetoMesLbl"></span></div>
@@ -520,12 +543,16 @@ const TETOS_PLANO={
   mercado:62000, lojas:15000, restaurante:8000, kombini:3000, compras_online:4000,
   transporte:9000, alimentacao:6500, vestuario:2500, educacao:12000, assinaturas:6700
 };
+// ── RESERVA DE EMERGÊNCIA ─────────────────────────────────
+// saldo/aporte em R$ (o dinheiro está no Brasil); custo essencial em ¥ (a vida é no Japão)
+const RESERVA_PADRAO={saldo:27.22, aporte:4153.51, mesesAlvo:9, custoMensalYen:199808};
+
 // Categoria da igreja (criada automaticamente, não altera lançamentos antigos)
 const CAT_IGREJA={id:'igreja',name:'⛪ Igreja',color:'#c4b5fd',ord:21,
   items:['Dízimo','Oferta','Lanche Igreja','Contribuição/Evento','Doação']};
 
 // ── STATE ──────────────────────────────────────────────────
-let S={lancamentos:[],categorias:[],brlRate:31.72,rateTS:'',taxas:{},tetos:null,dizimoPct:10};
+let S={lancamentos:[],categorias:[],brlRate:31.72,rateTS:'',taxas:{},tetos:null,dizimoPct:10,reserva:null};
 let SB=null,useCloud=false,curTipo='despesa';
 let OUT=[];
 // Set current month as default
@@ -561,7 +588,7 @@ function loadLocal(){
     if(r){
       const p=JSON.parse(r);
       // merge com os defaults para não perder campos novos em versões antigas
-      S={lancamentos:[],categorias:[],brlRate:31.72,rateTS:'',taxas:{},tetos:null,dizimoPct:10,...p};
+      S={lancamentos:[],categorias:[],brlRate:31.72,rateTS:'',taxas:{},tetos:null,dizimoPct:10,reserva:null,...p};
       if(!Array.isArray(S.lancamentos))S.lancamentos=[];
       if(!Array.isArray(S.categorias))S.categorias=[];
       if(!S.taxas||typeof S.taxas!=='object')S.taxas={};
@@ -571,6 +598,7 @@ function loadLocal(){
   return false;
 }
 function getTetos(){return (S.tetos&&typeof S.tetos==='object')?S.tetos:TETOS_PLANO;}
+function getReserva(){return Object.assign({},RESERVA_PADRAO,(S.reserva&&typeof S.reserva==='object')?S.reserva:{});}
 // Garante o conjunto base de categorias + a Igreja, sem tocar em lançamentos antigos.
 // Idempotente e independente da ordem em que é chamada.
 function ensureCats(){
@@ -657,7 +685,8 @@ async function cloudLoad(){
       return true;
     }
     const cfg=k=>{const x=cfgs.find(c=>c.key===k);return x?x.value:null;};
-    const rr=cfg('brlRate'),rt=cfg('rateTS'),tx=cfg('taxas'),ct=cfg('categorias'),tt=cfg('tetos'),dz=cfg('dizimoPct');
+    const rr=cfg('brlRate'),rt=cfg('rateTS'),tx=cfg('taxas'),ct=cfg('categorias'),tt=cfg('tetos'),dz=cfg('dizimoPct'),rv=cfg('reserva');
+    if(rv){try{S.reserva=JSON.parse(rv);}catch(e){}}
     if(rr)S.brlRate=parseFloat(rr);
     if(rt)S.rateTS=rt;
     if(tx){try{S.taxas=JSON.parse(tx);}catch(e){}}
@@ -687,6 +716,10 @@ function persistTetos(){
 function persistDizimo(){
   saveLocal();
   if(useCloud&&SB){queueOp({t:'cfg',k:'dizimoPct',v:String(S.dizimoPct)});flushOutbox();}
+}
+function persistReserva(){
+  saveLocal();
+  if(useCloud&&SB){queueOp({t:'cfg',k:'reserva',v:JSON.stringify(getReserva())});flushOutbox();}
 }
 async function cloudSeed(){
   for(const c of INITIAL_CATS){try{await sbFetch('categorias','POST',c);}catch(e){}}
@@ -794,7 +827,7 @@ function renderDash(){
     <div class="metric pos"><div class="lb">Entradas</div><div class="vl">¥${fmt(te)}</div><div class="sb">${curMonth}</div></div>
     <div class="metric ${sl>=0?'pos':'neg'}"><div class="lb">Saldo</div><div class="vl">¥${fmt(sl)}</div><div class="sb">${sl>=0?'Positivo':'Negativo'}</div></div>
     <div class="metric acc"><div class="lb">Meses</div><div class="vl">${getMonths().length}</div><div class="sb">registrados</div></div>`;
-  renderIgreja(months);renderTetos(months);
+  renderReserva();renderIgreja(months);renderTetos(months);
   renderBarChart(months);renderPieChart(months);renderLineChart();
   const all=[];
   months.forEach(m=>lancBy(m,'despesa').forEach(x=>all.push({...x,month:m})));
@@ -856,6 +889,69 @@ function restaurarTetosPlano(){
   S.tetos=JSON.parse(JSON.stringify(TETOS_PLANO));
   persistTetos();renderTetoEdit();
   toast('Tetos do plano restaurados ✓','ok');
+}
+
+// ── RESERVA DE EMERGÊNCIA ─────────────────────────────────
+function brl(v){return v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function renderReserva(){
+  const el=document.getElementById('rvCard');if(!el)return;
+  const R=getReserva(), taxa=S.brlRate||31.39;
+  const essBRL=R.custoMensalYen/taxa;              // custo essencial mensal convertido p/ R$
+  const alvo=essBRL*R.mesesAlvo;
+  const cobre=essBRL>0?R.saldo/essBRL:0;
+  const pct=alvo>0?Math.min(100,(R.saldo/alvo)*100):0;
+  const marcos=[
+    {n:1,ic:'🥉',nm:'Fôlego — 1 mês'},
+    {n:3,ic:'🥈',nm:'Mínimo — 3 meses'},
+    {n:6,ic:'🥇',nm:'Alvo — 6 meses'},
+    {n:9,ic:'🏆',nm:'Blindagem — 9 meses'}
+  ].map(m=>{
+    const v=essBRL*m.n, falta=v-R.saldo;
+    let quando='—';
+    if(falta<=0)quando='✓ atingido';
+    else if(R.aporte>0){
+      const d=new Date();d.setDate(d.getDate()+Math.ceil((falta/R.aporte)*30.44));
+      quando=d.toLocaleDateString('pt-BR',{month:'short',year:'numeric'});
+    }
+    return Object.assign({},m,{v,quando,ok:falta<=0});
+  });
+  el.innerHTML=`
+    <div class="rv-head">
+      <div class="rv-title">🛡 Reserva de emergência</div>
+      <div class="rv-in">R$ <input type="number" step="0.01" min="0" value="${R.saldo}" onchange="setReserva('saldo',this.value)" title="Saldo atual" /></div>
+    </div>
+    <div class="rv-main">
+      <div>
+        <div class="rv-lb">Guardado hoje</div>
+        <div class="rv-big">R$ ${brl(R.saldo)}</div>
+        <div class="rv-sub">cobre <strong style="color:var(--text)">${cobre.toFixed(1)} ${cobre===1?'mês':'meses'}</strong> de despesas essenciais</div>
+      </div>
+      <div style="text-align:right">
+        <div class="rv-lb">Meta (${R.mesesAlvo} meses)</div>
+        <div style="font-size:15px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums">R$ ${brl(alvo)}</div>
+        <div class="rv-sub">${pct.toFixed(1)}% concluído</div>
+      </div>
+    </div>
+    <div class="rv-track"><div class="rv-fill" style="width:${pct}%"></div></div>
+    <div class="rv-marks">${marcos.map(m=>`<span class="rv-mark" style="left:${Math.min(97,(m.n/R.mesesAlvo)*100)}%">${m.n}m</span>`).join('')}</div>
+    <div class="rv-list">${marcos.map(m=>`
+      <div class="rv-item ${m.ok?'done':''}">
+        <div class="ic">${m.ok?'✅':m.ic}</div>
+        <div class="nm">${m.nm}</div>
+        <div class="vl">R$ ${brl(m.v)}</div>
+        <div class="dt">${m.quando}</div>
+      </div>`).join('')}</div>
+    <div class="rv-head" style="margin:10px 0 0;padding-top:10px;border-top:.5px solid var(--border2)">
+      <div class="rv-in">Aporte R$ <input type="number" step="10" min="0" value="${R.aporte}" onchange="setReserva('aporte',this.value)" />/mês</div>
+      <div class="rv-in">Custo essencial ¥ <input type="number" step="1000" min="0" value="${R.custoMensalYen}" onchange="setReserva('custoMensalYen',this.value)" /></div>
+    </div>
+    <div class="rv-sub" style="margin-top:7px">Custo essencial ¥${fmt(R.custoMensalYen)} ≈ R$ ${brl(essBRL)}/mês · câmbio ¥${taxa.toFixed(2)}/R$</div>`;
+}
+function setReserva(campo,v){
+  const n=Math.max(0,parseFloat(v)||0);
+  const R=getReserva();R[campo]=n;S.reserva=R;
+  persistReserva();renderReserva();
+  toast('Reserva atualizada ✓','ok');
 }
 
 // ── IGREJA (dízimo % da renda + ofertas + lanches) ─────────
