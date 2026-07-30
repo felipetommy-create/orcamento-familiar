@@ -520,6 +520,7 @@ table.st .r{text-align:right;font-variant-numeric:tabular-nums}
 </nav>
 
 <script>
+const APP_VER='2026-07-30 · OCR jpn/合計';   // aparece na tela Config p/ conferir se o app atualizou
 const LS_KEY='kazoku-v5', LS_SB='kazoku-sb', LS_OUT='kazoku-outbox';
 const ALL_MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const PAGES=['dashboard','lancamentos','categorias','conversor','config'];
@@ -2002,9 +2003,10 @@ function cvYEN(){
 
 // ── CONFIG ─────────────────────────────────────────────────
 function renderCfg(){
-  document.getElementById('connInfo').innerHTML=useCloud&&SB
+  document.getElementById('connInfo').innerHTML=(useCloud&&SB
     ?`<strong>☁ Supabase conectado</strong><br>${SB.url}<br><span style="color:var(--green)">Sincronizado entre todos os dispositivos.</span>`
-    :`<strong>💾 Modo local</strong><br>Dados salvos apenas neste navegador.`;
+    :`<strong>💾 Modo local</strong><br>Dados salvos apenas neste navegador.`)
+    +`<br><span style="color:var(--muted);font-size:11px">Versão do app: ${APP_VER}</span>`;
   let html='';
   getMonths().forEach(m=>{
     const nd=lancBy(m,'despesa').length,ne=lancBy(m,'entrada').length,sl=totalE(m)-totalD(m);
