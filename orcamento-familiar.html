@@ -1553,12 +1553,15 @@ function extraiValores(txt){
 }
 // Nome do estabelecimento: costuma ser a primeira linha "de verdade" no topo do cupom.
 function extraiLoja(txt){
-  const lixo=/(領\s*収|レシート|明細|お客様|控|tel|phone|cnpj|cpf|http|www|登録番号|営業時間|定休|no[.:：]|レジ)/i;
-  for(const l of txt.split(/\n/).map(s=>s.trim()).filter(Boolean).slice(0,8)){
+  const lixo=/(領\s*収|レシート|明細|お客様|控|お預|お釣|小計|合計|税|tel|telefone|phone|fax|cnpj|cpf|cep|http|www|登録番号|営業|定休|調剤|会員|レジ|^店[:：]|number|n[úu]m|drug\s*store)/i;
+  const ehData=/(\d{4}\s*年)|\d{1,2}\s*[\/月]\s*\d{1,2}\s*[\/日]|\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}/;
+  const temNome=/[A-Za-zÀ-ÿ]{3,}|[一-龠]{2,}|[ぁ-んァ-ヶ]{2,}/;   // letras latinas/kanji/kana de verdade
+  for(const l of txt.split(/\n/).map(s=>s.trim()).filter(Boolean).slice(0,12)){
+    if(lixo.test(l)||ehData.test(l))continue;
     const limpo=l.replace(/[\s*=_.\-–—|<>＜＞()（）]/g,'');
-    if(limpo.length<2||lixo.test(l))continue;
-    if(/^[0-9¥￥R$%,.:：\/()-]+$/.test(limpo))continue;   // só números/símbolos
-    return l.replace(/[<>&]/g,'').slice(0,40);
+    if(limpo.length<2)continue;
+    if(!temNome.test(l))continue;                        // precisa ter texto, não só símbolos/números
+    return l.replace(/[<>&]/g,'').replace(/\s{2,}/g,' ').trim().slice(0,40);
   }
   return '';
 }
