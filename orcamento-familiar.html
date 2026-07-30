@@ -1588,6 +1588,39 @@ function extraiData(txt){
   if(m)return{dia:+m[1],mes:+m[2]};
   return null;
 }
+// Melhora a foto para o OCR: reescala, tons de cinza e alarga o contraste.
+// Cupom térmico fotografado no celular lê MUITO melhor assim.
+function preProcessaImg(file){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{
+      try{
+        let w=img.naturalWidth, h=img.naturalHeight;
+        let esc=1;
+        if(w<1200)esc=Math.min(2,1200/w);          // amplia foto pequena
+        else if(w>2000)esc=2000/w;                  // reduz foto gigante (acelera)
+        w=Math.round(w*esc); h=Math.round(h*esc);
+        const c=document.createElement('canvas'); c.width=w; c.height=h;
+        const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,w,h);
+        const im=ctx.getImageData(0,0,w,h), d=im.data, n=w*h, g=new Uint8Array(n);
+        let mn=255,mx=0;
+        for(let i=0,j=0;j<n;i+=4,j++){
+          const y=(d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114)|0;
+          g[j]=y; if(y<mn)mn=y; if(y>mx)mx=y;
+        }
+        const rng=Math.max(1,mx-mn);
+        for(let i=0,j=0;j<n;i+=4,j++){
+          let v=(g[j]-mn)*255/rng; v=v<0?0:v>255?255:v;   // estica contraste
+          d[i]=d[i+1]=d[i+2]=v;
+        }
+        ctx.putImageData(im,0,0);
+        resolve(c.toDataURL('image/png'));
+      }catch(e){ resolve(null); }
+    };
+    img.onerror=()=>resolve(null);
+    img.src=URL.createObjectURL(file);
+  });
+}
 async function lerComprovante(input){
   const f=input.files&&input.files[0]; input.value='';
   if(!f||ocrBusy)return;
@@ -1600,13 +1633,17 @@ async function lerComprovante(input){
   try{
     await carregaTesseract();
     const st=box.querySelector('.ocr-st');
-    const res=await Tesseract.recognize(OCR_URL,'jpn+por+eng',{
+    if(st)st.textContent='🖼️ Preparando a imagem...';
+    const fonte=(await preProcessaImg(f))||OCR_URL;   // usa versão tratada; cai no original se falhar
+    const res=await Tesseract.recognize(fonte,'jpn+por+eng',{
       logger:m=>{ if(st&&m.status==='recognizing text')st.textContent='🔍 Lendo... '+Math.round((m.progress||0)*100)+'%'; }
     });
     const txt=(res&&res.data&&res.data.text)||'';
+    const conf=(res&&res.data&&typeof res.data.confidence==='number')?res.data.confidence:0;
+    const ruim=conf<50;                                // leitura pouco confiável
     const vv=extraiValores(txt), val=vv.valor, dt=extraiData(txt);
-    const sug=sugereCategoria(txt);
-    const loja=extraiLoja(txt);
+    const sug=sugereCategoria(txt); if(ruim)sug.item='';   // não "reconhecer" loja no meio do lixo
+    const loja=ruim?'':extraiLoja(txt);
     const hoje=new Date();
     const mes=ALL_MONTHS[(dt?dt.mes-1:hoje.getMonth())]||ALL_MONTHS[hoje.getMonth()];
     const dia=dt?dt.dia:hoje.getDate();
@@ -1631,7 +1668,7 @@ async function lerComprovante(input){
         <label>Categoria</label>
         <select id="ocCat">${cats.map(c=>`<option value="${c.id}" ${c.id===sug.cat?'selected':''}>${c.name}</option>`).join('')}</select>
       </div>
-      <div class="ocr-st">${val?'✅ Sugerido: <strong style="color:var(--green)">¥'+fmt(val)+'</strong> — <strong>confira no cupom</strong>, a leitura erra às vezes.':'⚠ Não achei o valor — digite à mão.'}${dt?' Data lida do cupom.':''}${sug.item?' Loja reconhecida: '+sug.item+'.':(loja?' Estabelecimento: '+loja+'.':'')}</div>
+      <div class="ocr-st">${ruim?'<strong style="color:var(--red)">⚠ Leitura ruim</strong> (foto tremida/escura ou cupom amassado). <strong>Confira tudo</strong> ou tire outra foto reta, plana e bem iluminada. ':''}${val?(ruim?'':'✅ ')+'Sugerido: <strong style="color:var(--green)">¥'+fmt(val)+'</strong>'+(ruim?'':' — <strong>confira no cupom</strong>, a leitura erra às vezes.'):'⚠ Não achei o valor — digite à mão.'}${dt?' Data lida do cupom.':''}${sug.item?' Loja reconhecida: '+sug.item+'.':(loja?' Estabelecimento: '+loja+'.':'')}</div>
       <div class="imp-acts">
         <button class="btn-ghost" style="margin:0" onclick="fecharOCR()">Cancelar</button>
         <button class="btn-add" onclick="registrarOCR()">Registrar despesa</button>
